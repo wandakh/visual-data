@@ -5,21 +5,20 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^7.0||^8.2",
         "ext-gd": "*",
         "ext-zip": "*",
         "almasaeed2010/adminlte": "~3.0",
         "fruitcake/laravel-cors": "^3.0",
         "guzzlehttp/guzzle": "^7.0.1",
-        "laravel/framework": "^10.0",
+        "laravel/framework": "^8.0",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "maatwebsite/excel": "^3.1",
         "phpoffice/phpspreadsheet": "*",
-        "spatie/laravel-permission": "^6.3",
-        "yajra/laravel-datatables": "^1.5",
-        "yajra/laravel-datatables-oracle": "^9.21"
+        "spatie/laravel-permission": "^6.3"
+     
     },
     "require-dev": {
         "facade/ignition": "^2.5",
@@ -36,7 +35,6 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "classmap": [
-            "database/seeds",
             "database/factories",
             "app/Console/Kernel.php"
         ]

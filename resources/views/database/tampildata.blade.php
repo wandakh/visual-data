@@ -42,21 +42,21 @@
                                     <select class="form-select"name="NAMA_CUSTOMER" aria-label="Size 3 select example">
                                         <option selected>{{ $data->NAMA_CUSTOMER }}</option>
                                         <option value="">--pilih--</option>
-                                        <option value="1">Fliptech Lentera Inspirasi Pertiwi</option>
-                                        <option value="2">Global Indo Multimedia</option>
-                                        <option value="3">Ovo</option>
-                                        <option value="3">PT Akses Solusi Nusantara</option>
-                                        <option value="3">PT ALFFAR BERKAH MANDIRI CORPORINDO</option>
-                                        <option value="3">PT Digital Kreasi Telekomunikasi</option>
-                                        <option value="3">PT EMobile Indonesia</option>
-                                        <option value="3">PT MARKAZ JALAN BERSAMA</option>
-                                        <option value="3">PT MEGA KREASI INDOTAMA</option>
-                                        <option value="3">PT Mitra Distribusi Utama</option>
-                                        <option value="3">PT MMBC TOUR AND TRAVEL</option>
-                                        <option value="3">PT SARANA KREASI PERKASA (PLUSLINK)</option>
-                                        <option value="3">PT Widya Mahardika Raya</option>
-                                        <option value="3">PT. Berkah Berkat Bersatu</option>
-                                        <option value="3">Satulink Lintas Indonesia</option>
+                                        <option value="Fliptech Lentera Inspirasi Pertiwi">Fliptech Lentera Inspirasi Pertiwi</option>
+                                        <option value="Global Indo Multimedia">Global Indo Multimedia</option>
+                                        <option value="Ovo">Ovo</option>
+                                        <option value="PT Akses Solusi Nusantara">PT Akses Solusi Nusantara</option>
+                                        <option value="PT ALFFAR BERKAH MANDIRI CORPORINDO">PT ALFFAR BERKAH MANDIRI CORPORINDO</option>
+                                        <option value="PT Digital Kreasi Telekomunikasi">PT Digital Kreasi Telekomunikasi</option>
+                                        <option value="PT EMobile Indonesia">PT EMobile Indonesia</option>
+                                        <option value="PT MARKAZ JALAN BERSAMA">PT MARKAZ JALAN BERSAMA</option>
+                                        <option value="PT MEGA KREASI INDOTAMA">PT MEGA KREASI INDOTAMA</option>
+                                        <option value="PT Mitra Distribusi Utama">PT Mitra Distribusi Utama</option>
+                                        <option value="PT MMBC TOUR AND TRAVEL">PT MMBC TOUR AND TRAVEL</option>
+                                        <option value="PT SARANA KREASI PERKASA (PLUSLINK)">PT SARANA KREASI PERKASA (PLUSLINK)</option>
+                                        <option value="PT Widya Mahardika Raya">PT Widya Mahardika Raya</option>
+                                        <option value="PT. Berkah Berkat Bersatu">PT. Berkah Berkat Bersatu</option>
+                                        <option value="Satulink Lintas Indonesia">Satulink Lintas Indonesia</option>
                                     </select>
                                 </div>
                                 <div class="col mb-2">
@@ -68,7 +68,7 @@
                             </div>
                             <div class="row g-2">
                                 <div class="col mb-2">
-                                    <label for=class="form-label">AMMOUNT</label>
+                                    <label for="form-label">AMMOUNT</label>
                                     <input type="number" class="form-control"name="AMMOUNT" id="floatingInput"
                                         value="{{ $data->AMMOUNT }}">
                                 </div>

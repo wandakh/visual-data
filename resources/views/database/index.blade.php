@@ -6,4 +6,3 @@
 
 @include('layouts.tables')
 
-@include('layouts.footer')

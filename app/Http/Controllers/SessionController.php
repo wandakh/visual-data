@@ -72,28 +72,21 @@ class SessionController extends Controller
             'name' => 'required|max:255|regex:/^[A-Z][a-z]+$/',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:5|max:255',
-            'role' => 'required|in:user,admin', 
+            // 'role' => 'required|in:user,admin', 
         ]);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role, 
+            // 'role' => $request->role, 
         ];
         
       
         $user = UserNew::create($data);
 
+        $user->assignRole('user');
         
-
-       
-        $roleName = $request->input('role');
-        $role = Role::where('name', $roleName)->first();
-
-        if ($role) {
-            $user->assignRole($role);
-        }
 
         return redirect('/sesi')->with('berhasil', 'Register berhasil silahkan login');
     }

@@ -163,9 +163,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $index => $item)
+                        @foreach ($data as $item)
                             <tr>
-                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $item->id}}</td>
                                 <td>{{ \Carbon\Carbon::parse($item->Tanggal)->format('d/m/Y') }}</td>
                                 <td>{{ $item->ORG_CODE }}</td>
                                 <td>{{ $item->NAMA_CUSTOMER }}</td>
@@ -186,10 +186,8 @@
                                             class="btn btn-primary btn-action">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
-                                        <a href="#" class="btn btn-danger btn-action delete"
-                                            data-id="{{ $item->id }}" data-nama="{{ $item->NAMA_CUSTOMER }}">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </a>
+                                        <a href="#" class="btn btn-danger delete" data-id="{{ $item->id }}" data-nama="{{ $item->NAMA_CUSTOMER }}" ><i class="fa-solid fa-trash" ></i></a>
+
                                     @endif
 
                                     <button class="btn btn-info btn-action view-detail" data-bs-target="#modal-detail"
@@ -236,41 +234,38 @@
     @endforeach
 
 
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.3/dist/sweetalert2.all.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.js"
-        integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
-    <script>
-        $('.delete').click(function() {
-            var databaseid = $(this).attr('data-id');
-            var nama = $(this).attr('data-nama');
-
-            swal({
-                    title: "Yakin?",
-                    text: "Ingin menghapus data dengan nama customer : " + nama + " dengan id " + databaseid +
-                        "",
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                })
-                .then((willDelete) => {
-                    if (willDelete) {
-                        window.location = "/delete/" + databaseid + ""
-                        swal("Data berhasil dihapus", {
-                            icon: "success",
-                        });
-                    } else {
-                        swal("Data tidak dihapus");
-                    }
-                });
-
-
-        });
-    </script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+<script>
 
-    
+    $('.delete').click(function(){
+      var databaseid = $(this).attr('data-id');
+      var nama = $(this).attr('data-nama');
 
+      swal({
+        title: "Yakin?",
+        text: "Ingin menghapus data id : "+databaseid+" dengan nama customer : "+nama+" ",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+  })
+      .then((willDelete) => {
+          if (willDelete) {
+          window.location = "/delete/"+databaseid+
+      swal("Data berhasil dihapus", {
+        icon: "success",
+      });
+    } else {
+        swal("Data tidak dihapus");
+    }
+  });
+
+
+    });
+  
+</script>
+   
 <script>
 $(document).ready(function () {
     $('#per_page').on('change', function () {

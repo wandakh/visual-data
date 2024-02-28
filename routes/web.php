@@ -61,7 +61,7 @@ Route::middleware(['web', 'isGuest'])->group(function () {
     Route::post('sesi/login', [SessionController::class, 'login'])->name('sesi.login');
     Route::get('sesi/logout', [SessionController::class, 'logout'])->name('sesi.logout')->withoutMiddleware(['isGuest']);
     Route::get('sesi/register', [SessionController::class, 'register'])->name('sesi.register');
-    Route::post('sesi/create', [SessionController::class, 'create']);
+    Route::post('sesi/create', [SessionController::class, 'create'])->name('sesi.cerate');
 });
 
 

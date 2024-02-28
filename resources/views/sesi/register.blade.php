@@ -10,8 +10,6 @@
 
 
 <body class="bg-gradient-dark">
-
-
     <div class="container">
         <div class="card o-hidden border-0 shadow-lg my-5">
             <div class="card-body p-0">
@@ -75,15 +73,5 @@
 
 
     </div>
-
-
-    <script>
-        $(document).ready(function () {
-            $('#role').dropdown('toggle');
-        });
-
-    </script>
-
-
 
 </body>

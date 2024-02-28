@@ -188,7 +188,7 @@ return [
          * Package Service Providers...
          */ 
         Maatwebsite\Excel\ExcelServiceProvider::class,
-        Yajra\DataTables\DataTablesServiceProvider::class,
+       
 
 
 
