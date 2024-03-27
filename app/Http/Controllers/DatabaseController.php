@@ -56,6 +56,7 @@ class DatabaseController extends Controller
             'dropdown' => $dropdown,
             'title' => 'Data Terfilter',
             'perPage' => $perPage,
+            'request' => $request
         ]);
     }
 
@@ -72,12 +73,7 @@ class DatabaseController extends Controller
         }
     }
 
-    public function diagram()
-    {
-        return view('database.diagram', [
-            "title" => "Diagram",
-        ]);
-    }
+  
 
     public function show($id)
     {

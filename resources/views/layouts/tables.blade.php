@@ -224,6 +224,7 @@
             showing {{ $data->firstItem() }} to {{ $data->lastItem() }} of {{ $data->total() }} entries
         </div>
     </div>
+</div>
     @include('layouts.footer')
 
 
@@ -264,6 +265,25 @@
 
     });
   
+</script>
+<script>
+    $(document).ready(function () {
+        function toggleFooter() {
+            var contentHeight = $('body').height();
+            var windowHeight = $(window).height();
+            var footer = $('#footer');
+
+            if (contentHeight < windowHeight) {
+                footer.show();
+            } else {
+                footer.hide();
+            }
+        }
+
+        // Panggil fungsi toggleFooter saat halaman dimuat dan diresize
+        toggleFooter();
+        $(window).resize(toggleFooter);
+    });
 </script>
    
 <script>

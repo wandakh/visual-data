@@ -29,48 +29,35 @@ class ExcelController extends Controller
         return redirect()->route('database')->with('success', 'Data berhasil diimport.');
     }
 
-
-
-
     public function export(Request $request)
     {
         $filterNama = $request->filter_export;
-        $nama_customer = 'NAMA_CUSTOMER';
+        $exportType = $request->export_type;
         $data = Database::when($filterNama, function ($query) use ($filterNama) {
             return $query->where('NAMA_CUSTOMER', 'LIKE', '%' . $filterNama . '%');
         })->get();
-
+    
         try {
-            // nah ini try gunanya buat nyoba eksekusi kode kalo bakal error
-            // kalo ga error lanjut deh ke bawah :v.
-
-            // nah di ntar di bladenya ada 2 tipenya 
-            $nama_customer_slug = Str::slug($nama_customer);
-            $exportType = $request->export_type;
-            $filename = 'data_export'.$nama_customer_slug;
-
             if ($exportType == 'summary') {
-                $filename .= '_summary';
-                // Ambil dua kolom yang yang dimau
-                $data = $data->map(function ($item) {
-                    return [
-                        'Tanggal' => $item->Tanggal,
-                        'NAMA_CUSTOMER' => $item->NAMA_CUSTOMER,
-                    ];
-                });
+                // buat nama file, ada tanggalnya
+                $filename = 'summary_' . date('Y-m-d') . '.xlsx';
             } else {
-                $filename .= '_semua';
-                // Ambil semua kolom
+                //ambil nama customer buat dijadiin nama file
+                $firstCustomer = $data->first()->NAMA_CUSTOMER;
+                //ini gantii spasi jadi (_) terus ubah jadi huruf kecil
+                $customerName = str_replace(' ', '_', strtolower($firstCustomer));
+                // Tambah tipe ekspor ke nama file
+                $filename = $customerName . '_' . $exportType . '_' . date('Y-m-d') . '.xlsx';
             }
-
-            $filename .= '.xlsx';
-
-         
+    
+            // Tambahkan baris header ke array data
+            $headerRow = ['Tanggal', 'ORG_CODE', 'NAMA_CUSTOMER', 'KODE_PRODUK', 'AMMOUNT', 'HARGA_JUAL', 'TRX', 'TYPE_MITRA', 'AMMOUNT_FIX', 'PRODUK_FIX', 'BUCKET_NAME', 'Type_Produk', 'TYPE_BISNIS', 'REV_INPPN', 'PAJAK', 'REV_EXPPN', 'HPP', 'TOTAL_HPP_INPPN', 'TOTAL_HPP_EXPPN', 'Margin_INPPN', 'Margin_EXPPN', 'Hari', 'Bulan', 'KET_PROD'];
+            $data->prepend($headerRow);
+    
+            // Ekspor data ke file Excel
             return Excel::download(new DatabaseExport($data), $filename);
         } catch (\Exception $e) {
-
-
             return redirect()->back()->with('gagal_ekspor', 'Gagal melakukan ekspor data. Error: ' . $e->getMessage());
         }
     }
-}
+}    

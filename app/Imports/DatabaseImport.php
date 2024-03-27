@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Database;
 use Maatwebsite\Excel\Concerns\ToModel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class DatabaseImport implements ToModel
 {
@@ -14,30 +15,34 @@ class DatabaseImport implements ToModel
     */
     public function model(array $row)
     {
+        $excelDate = Date::excelToDateTimeObject($row[0]);
+
         return new Database([
-            'Tanggal' => $row[1],
-            'ORG_CODE' => $row[2],
-            'NAMA_CUSTOMER' => $row[3],
-            'KODE_PRODUK' => $row[4],
-            'AMMOUNT'=> $row[5],
-            'HARGA_JUAL' => $row[6],
-            'TRX' => $row[7],
-            'TYPE_MITRA' => $row[8],
-            'AMMOUNT_FIX' => $row[9],
-            'PRODUK_FIX' => $row[10],
-            'BUCKET_NAME' => $row[11],
-            'Type_Produk' => $row[12],
-            'TYPE_BISNIS' => $row[13],
-            'REV_INPPN' => $row[14],
-            'PAJAK' => $row[15],
-            'REV_EXPPN' => $row[16],
+            'Tanggal' => $excelDate,
+            'ORG_CODE' => $row[1],
+            'NAMA_CUSTOMER' => $row[2],
+            'KODE_PRODUK' => $row[3],
+            'AMMOUNT' => $row[4],
+            'HARGA_JUAL' => $row[5],
+            'TRX' => $row[6],
+            'TYPE_MITRA' => $row[7],
+            'AMMOUNT_FIX' => $row[8],
+            'PRODUK_FIX' => $row[9],
+            'BUCKET_NAME' => $row[10],
+            'Type_Produk' => $row[11],
+            'TYPE_BISNIS' => $row[12],
+            'REV_INPPN' => $row[13],
+            'PAJAK' => $row[14],
+            'REV_EXPPN' => $row[15],
+            'HPP' => $row[16],
             'TOTAL_HPP_INPPN' => $row[17],
             'TOTAL_HPP_EXPPN' => $row[18],
             'Margin_INPPN' => $row[19],
             'Margin_EXPPN' => $row[20],
-            'Hari' => $row[21],
+            'Hari' => $row[21],                                                 
             'Bulan' => $row[22],
             'KET_PROD' => $row[23],
+
 
         ]);
     }

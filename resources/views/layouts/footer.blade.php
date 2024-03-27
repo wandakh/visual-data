@@ -1,5 +1,7 @@
+
+<link rel="stylesheet" href="{{ asset('/css/style.css') }}">
 <!-- Footer -->
-<footer class="sticky-footer bg-white">
+<footer class="sticky-footer" id="footer">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
             <span>Copyright &copy; Visual Data 2023</span>

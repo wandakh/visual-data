@@ -10,7 +10,7 @@
     'locale' => 'en',
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
-    'key' => 'base64:kjT3nBl8wjbWsL6NCb3JOu760Y9+pP1rmB38uE1O9Lk=',
+    'key' => 'base64:xbkLIJQSvz9uFTXNsBjozWfrCtdWW4MwEE5URvR8Jt0=',
     'cipher' => 'AES-256-CBC',
     'maintenance' => 
     array (
@@ -198,8 +198,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'W:\\htdocs\\visual-data-2\\storage\\framework/cache/data',
-        'lock_path' => 'W:\\htdocs\\visual-data-2\\storage\\framework/cache/data',
+        'path' => 'W:\\htdocs\\visual-data-3\\storage\\framework/cache/data',
+        'lock_path' => 'W:\\htdocs\\visual-data-3\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -282,7 +282,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'visual-data',
+        'database' => 'visual-data2',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -292,7 +292,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'visual-data',
+        'database' => 'visual-data2',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -312,7 +312,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'visual-data',
+        'database' => 'visual-data2',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -327,7 +327,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'visual-data',
+        'database' => 'visual-data2',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -526,7 +526,7 @@
     ),
     'temporary_files' => 
     array (
-      'local_path' => 'W:\\htdocs\\visual-data-2\\storage\\framework/cache/laravel-excel',
+      'local_path' => 'W:\\htdocs\\visual-data-3\\storage\\framework/cache/laravel-excel',
       'remote_disk' => NULL,
       'remote_prefix' => NULL,
       'force_resync_remote' => NULL,
@@ -540,13 +540,13 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'W:\\htdocs\\visual-data-2\\storage\\app',
+        'root' => 'W:\\htdocs\\visual-data-3\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'W:\\htdocs\\visual-data-2\\storage\\app/public',
+        'root' => 'W:\\htdocs\\visual-data-3\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -554,7 +554,7 @@
       'local_public' => 
       array (
         'driver' => 'local',
-        'root' => 'W:\\htdocs\\visual-data-2\\storage',
+        'root' => 'W:\\htdocs\\visual-data-3\\storage',
       ),
       's3' => 
       array (
@@ -575,7 +575,7 @@
     ),
     'links' => 
     array (
-      'W:\\htdocs\\visual-data-2\\public\\storage' => 'W:\\htdocs\\visual-data-2\\storage\\app/public',
+      'W:\\htdocs\\visual-data-3\\public\\storage' => 'W:\\htdocs\\visual-data-3\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -614,14 +614,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'W:\\htdocs\\visual-data-2\\storage\\logs/laravel.log',
+        'path' => 'W:\\htdocs\\visual-data-3\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'W:\\htdocs\\visual-data-2\\storage\\logs/laravel.log',
+        'path' => 'W:\\htdocs\\visual-data-3\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -686,7 +686,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'W:\\htdocs\\visual-data-2\\storage\\logs/laravel.log',
+        'path' => 'W:\\htdocs\\visual-data-3\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -753,7 +753,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'W:\\htdocs\\visual-data-2\\resources\\views/vendor/mail',
+        0 => 'W:\\htdocs\\visual-data-3\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -904,7 +904,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'W:\\htdocs\\visual-data-2\\storage\\framework/sessions',
+    'files' => 'W:\\htdocs\\visual-data-3\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -924,9 +924,49 @@
   array (
     'paths' => 
     array (
-      0 => 'W:\\htdocs\\visual-data-2\\resources\\views',
+      0 => 'W:\\htdocs\\visual-data-3\\resources\\views',
     ),
-    'compiled' => 'W:\\htdocs\\visual-data-2\\storage\\framework\\views',
+    'compiled' => 'W:\\htdocs\\visual-data-3\\storage\\framework\\views',
+  ),
+  'flare' => 
+  array (
+    'key' => NULL,
+    'reporting' => 
+    array (
+      'anonymize_ips' => true,
+      'collect_git_information' => false,
+      'report_queries' => true,
+      'maximum_number_of_collected_queries' => 200,
+      'report_query_bindings' => true,
+      'report_view_data' => true,
+      'grouping_type' => NULL,
+      'report_logs' => true,
+      'maximum_number_of_collected_logs' => 200,
+      'censor_request_body_fields' => 
+      array (
+        0 => 'password',
+      ),
+    ),
+    'send_logs_as_events' => true,
+    'censor_request_body_fields' => 
+    array (
+      0 => 'password',
+    ),
+  ),
+  'ignition' => 
+  array (
+    'editor' => 'phpstorm',
+    'theme' => 'light',
+    'enable_share_button' => true,
+    'register_commands' => false,
+    'ignored_solution_providers' => 
+    array (
+      0 => 'Facade\\Ignition\\SolutionProviders\\MissingPackageSolutionProvider',
+    ),
+    'enable_runnable_solutions' => NULL,
+    'remote_sites_path' => '',
+    'local_sites_path' => '',
+    'housekeeping_endpoint_prefix' => '_ignition',
   ),
   'tinker' => 
   array (

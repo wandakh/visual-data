@@ -6,10 +6,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\DiagramController;
+use App\Http\Controllers\DiagramHarianController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TambahDataController;
 use App\Http\Controllers\UpdateContoller;
-
+use DiagramHarianController as GlobalDiagramHarianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,20 +41,23 @@ Route::middleware(['isLogin'])->group(function () {
     Route::get('/tampilkandata/{id}', [UpdateContoller::class, 'tampilkandata'])->name('tampilkandata');
     Route::post('/updatedata/{id}', [UpdateContoller::class, 'updatedata'])->name('updatedata');
     Route::put('/database/{id}', [DatabaseController::class, 'update']);
-    
+
     // Excel
     Route::get('/database-export', [ExcelController::class, 'export'])->name('database.export');
     Route::post('/database-Import', [ExcelController::class, 'import'])->name('database.import');
-    
 
-    Route::get('/delete/{id}', [DatabaseController::class,'delete'])->name('delete');
 
-    Route::get('/diagram', [DatabaseController::class, 'diagram'])->name('diagram');
-    
+    Route::get('/delete/{id}', [DatabaseController::class, 'delete'])->name('delete');
+   
+
+    Route::get('/diagram', [DiagramController::class, 'diagram'])->name('diagram');
+
+
+
+
+
     Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
     Route::post('/update/profile', [ProfileController::class, 'update_profile'])->name('update_profile');
-    
-
 });
 
 
