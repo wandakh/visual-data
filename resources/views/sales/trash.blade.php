@@ -1,0 +1,118 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="space-y-6">
+    <div class="flex items-center gap-3">
+        <a href="{{ route('database') }}" class="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600 hover:bg-slate-200">
+            @include('partials.icon', ['name' => 'chevron-left', 'class' => 'h-4 w-4'])
+            Kembali
+        </a>
+        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Data Terhapus</h1>
+    </div>
+    <p class="-mt-4 text-sm text-slate-500">Data yang dihapus bisa dipulihkan dalam 24 jam. Lewat dari itu, otomatis terhapus permanen.</p>
+
+    @if (session('success'))
+        <div class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-100">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">{{ session('error') }}</div>
+    @endif
+
+    <!-- Widget rekap per alasan -->
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    @foreach (\App\Models\SalesRecord::ALASAN_HAPUS as $value => $label)
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+            <p class="text-2xl font-bold text-slate-800">{{ $rekapAlasan[$value] ?? 0 }}</p>
+            <p class="text-xs text-slate-500">{{ $label }}</p>
+        </div>
+    @endforeach
+</div>
+    <!-- Filter tanggal -->
+   <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        @if (!$showAll)
+            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
+                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
+                Hanya menampilkan data hari ini &mdash;
+                <a href="{{ route('database.trash') }}?show_all=1" class="underline hover:text-indigo-800">Tampilkan Semua</a>
+            </p>
+        @else
+            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
+                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
+                Menampilkan semua data &mdash;
+                <a href="{{ route('database.trash') }}" class="underline hover:text-indigo-800">Tampilkan Hari Ini Saja</a>
+            </p>
+        @endif
+        <form action="{{ route('database.trash') }}" method="GET" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-500">Dihapus dari tanggal</label>
+                <input type="date" name="start_date" value="{{ request('start_date') }}"
+                       class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-500">Sampai tanggal</label>
+                <input type="date" name="end_date" value="{{ request('end_date') }}"
+                       class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            </div>
+            <button type="submit" class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+                @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3 text-left">#</th>
+                        <th class="px-4 py-3 text-left">Tanggal</th>
+                        <th class="px-4 py-3 text-left">Customer</th>
+                        <th class="px-4 py-3 text-left">Alasan Hapus</th>
+                        <th class="px-4 py-3 text-left">Dihapus pada</th>
+                        <th class="px-4 py-3 text-left">Sisa waktu</th>
+                        <th class="px-4 py-3 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($data as $item)
+                        @php
+                            $batasWaktu = $item->deleted_at->addDay();
+                            $sisaJam = max(0, now()->diffInHours($batasWaktu, false));
+                        @endphp
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="px-4 py-3 text-slate-400">{{ $data->firstItem() + $loop->index }}</td>
+                            <td class="px-4 py-3 tabular-nums">{{ \Carbon\Carbon::parse($item->Tanggal)->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3 font-medium text-slate-700">{{ $item->NAMA_CUSTOMER }}</td>
+                            <td class="px-4 py-3 text-slate-600">{{ \App\Models\SalesRecord::ALASAN_HAPUS[$item->deleted_reason] ?? '-' }}</td>
+                            <td class="px-4 py-3 tabular-nums text-slate-500">{{ $item->deleted_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-4 py-3">
+                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $sisaJam <= 4 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700' }}">
+                                    &sim;{{ $sisaJam }} jam lagi
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <form action="{{ route('database.restore', $item->id) }}" method="POST"
+                                      onsubmit="return confirm('Pulihkan data #{{ $item->id }} milik {{ $item->NAMA_CUSTOMER }}?')">
+                                    @csrf
+                                    <button type="submit" class="ml-auto flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100">
+                                        @include('partials.icon', ['name' => 'restore', 'class' => 'h-3.5 w-3.5'])
+                                        Pulihkan
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-12 text-center text-slate-400">Belum ada data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="border-t border-slate-100 px-4 py-4">
+            {{ $data->links() }}
+        </div>
+    </div>
+</div>
+@endsection
