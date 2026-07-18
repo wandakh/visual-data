@@ -83,15 +83,22 @@
     @foreach ($fields as $column => $label)
         <div>
             <label class="mb-1 block text-sm font-medium text-slate-700">{{ $label }}</label>
-            <input type="text" name="{{ $column }}" list="list-{{ $column }}" required
-                   value="{{ old($column, $data->$column ?? '') }}"
-                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <datalist id="list-{{ $column }}">
-                <template x-for="opt in (options['{{ $column }}'] || [])" :key="opt">
-                    <option :value="opt"></option>
-                </template>
-            </datalist>
-            @error($column)<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+            @if ($column === 'ORG_CODE' && ($lockedOrgCode ?? null))
+                <input type="text" value="{{ $lockedOrgCode }}" readonly
+                       class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-500">
+                <input type="hidden" name="ORG_CODE" value="{{ $lockedOrgCode }}">
+                <p class="mt-1 text-xs text-slate-400">Terkunci ke ORG_CODE cabang kamu</p>
+            @else
+                <input type="text" name="{{ $column }}" list="list-{{ $column }}" required
+                       value="{{ old($column, $data->$column ?? '') }}"
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <datalist id="list-{{ $column }}">
+                    <template x-for="opt in (options['{{ $column }}'] || [])" :key="opt">
+                        <option :value="opt"></option>
+                    </template>
+                </datalist>
+                @error($column)<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+            @endif
         </div>
     @endforeach
 </div>

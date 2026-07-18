@@ -19,7 +19,7 @@ class UserActivityLog extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     public static function record(string $action, ?int $userId, ?string $description = null): void

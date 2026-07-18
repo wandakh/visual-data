@@ -10,6 +10,9 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request): View
     {
+        // Diperbaiki: halaman ini SENGAJA selalu default ke "Hari Ini" tiap
+        // dibuka fresh (gak ada mekanisme "inget pilihan terakhir" kayak di
+        // Dashboard) — biar loading ringan & fokus ke aktivitas terbaru.
         $showAll = $request->boolean('show_all');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
@@ -35,9 +38,16 @@ class ActivityLogController extends Controller
         $applyDateFilter($importLogsQuery);
         $importLogs = $importLogsQuery->latest('created_at')->paginate(10, ['*'], 'import_page')->withQueryString();
 
+        // Diperbaiki: export sekarang dipusatkan di sini juga (sebelumnya
+        // di Log Login & Export, dipisah dari import — sekarang disatuin).
+        $exportLogsQuery = ActivityLog::with('user')->where('action', 'exported');
+        $applyDateFilter($exportLogsQuery);
+        $exportLogs = $exportLogsQuery->latest('created_at')->paginate(10, ['*'], 'export_page')->withQueryString();
+
         return view('activity-log.index', [
             'dataLogs' => $dataLogs,
             'importLogs' => $importLogs,
+            'exportLogs' => $exportLogs,
             'title' => 'Log Data',
             'showAll' => $showAll,
         ]);

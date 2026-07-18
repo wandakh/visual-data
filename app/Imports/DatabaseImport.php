@@ -29,9 +29,21 @@ class DatabaseImport implements ToModel, WithHeadingRow, WithChunkReading, WithB
     /** Berapa baris yang dilewati (kosong / gak ada header yang cocok sama sekali). */
     public int $dilewati = 0;
 
+    /** Berapa baris yang DITOLAK karena ORG_CODE-nya bukan milik Karyawan yang import. */
+    public int $ditolakOrgCode = 0;
+
     /** Tanggal paling awal & paling akhir dari data yang diimport (buat log). */
     public ?string $tanggalTerawal = null;
     public ?string $tanggalTerakhir = null;
+
+    /**
+     * Kalau diisi (Karyawan yang import), baris yang ORG_CODE-nya BEDA dari
+     * ini bakal ditolak otomatis — Karyawan gak boleh nyelundupin data ke
+     * cabang lain lewat import.
+     */
+    public function __construct(private readonly ?string $orgCodeWajib = null)
+    {
+    }
 
     private const ALIAS = [
         'Tanggal' => ['tanggal', 'tgl', 'date'],
@@ -67,6 +79,14 @@ class DatabaseImport implements ToModel, WithHeadingRow, WithChunkReading, WithB
 
         if (!$tanggalMentah && !$namaCustomer) {
             $this->dilewati++;
+
+            return null;
+        }
+
+        $orgCodeBaris = $this->cari($row, self::ALIAS['ORG_CODE']);
+
+        if ($this->orgCodeWajib && $orgCodeBaris !== $this->orgCodeWajib) {
+            $this->ditolakOrgCode++;
 
             return null;
         }

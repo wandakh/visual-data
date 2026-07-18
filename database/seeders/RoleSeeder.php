@@ -35,7 +35,10 @@ class RoleSeeder extends Seeder
         // Admin dapat semua permission.
         $admin->syncPermissions($permissions);
 
-        // User biasa: cuma boleh export data (sama seperti perilaku sebelumnya).
-        $user->syncPermissions(['export-data']);
+        // Karyawan: boleh tambah, edit, import, export data (dibatasi ke
+        // ORG_CODE mereka sendiri di level query, bukan di level permission).
+        // TIDAK dapat delete-data (gak boleh hapus/kelola Trash) atau
+        // view-margin (data finansial cuma buat Admin).
+        $user->syncPermissions(['create-data', 'edit-data', 'import-excel', 'export-data']);
     }
 }

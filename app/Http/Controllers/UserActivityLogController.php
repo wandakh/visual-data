@@ -29,38 +29,58 @@ class UserActivityLogController extends Controller
             }
         };
 
-        $loginLogsQuery = UserActivityLog::with('user')->whereIn('action', ['login', 'logout', 'login_failed', 'overtime_request']);
-        $applyDateFilter($loginLogsQuery);
-        $loginLogs = $loginLogsQuery->latest('created_at')->paginate(10, ['*'], 'login_page')->withQueryString();
+        // Dipisah jadi 3 tabel biar gak kecampur — Admin, User, dan
+        // percobaan login gagal (gak ada user_id-nya karena kredensial
+        // gak match siapapun, jadi gak bisa dikelompokkan ke role manapun).
+        // Diperbaiki: export udah GAK ADA lagi di sini — dipindah & dipusatkan
+        // ke Log Data bareng import.
+        $adminRoleIds = User::role('admin')->pluck('id');
+        $karyawanRoleIds = User::role('user')->pluck('id');
 
-        $exportLogsQuery = UserActivityLog::with('user')->where('action', 'export');
-        $applyDateFilter($exportLogsQuery);
-        $exportLogs = $exportLogsQuery->latest('created_at')->paginate(10, ['*'], 'export_page')->withQueryString();
+        $adminLoginLogsQuery = UserActivityLog::with('user')
+            ->whereIn('action', ['login', 'logout'])
+            ->whereIn('user_id', $adminRoleIds);
+        $applyDateFilter($adminLoginLogsQuery);
+        $adminLoginLogs = $adminLoginLogsQuery->latest('created_at')->paginate(10, ['*'], 'admin_login_page')->withQueryString();
+
+        $userLoginLogsQuery = UserActivityLog::with('user')
+            ->whereIn('action', ['login', 'logout', 'overtime_request'])
+            ->whereIn('user_id', $karyawanRoleIds);
+        $applyDateFilter($userLoginLogsQuery);
+        $userLoginLogs = $userLoginLogsQuery->latest('created_at')->paginate(10, ['*'], 'user_login_page')->withQueryString();
+
+        $failedLoginLogsQuery = UserActivityLog::where('action', 'login_failed');
+        $applyDateFilter($failedLoginLogsQuery);
+        $failedLoginLogs = $failedLoginLogsQuery->latest('created_at')->paginate(10, ['*'], 'failed_login_page')->withQueryString();
 
         // Rekap harian (selalu HARI INI, gak ikut filter tanggal di atas —
-        // ini soal status "sekarang", bukan riwayat).
-        $loginHariIni = UserActivityLog::with('user')
-            ->where('action', 'login')
-            ->whereDate('created_at', today())
-            ->get();
+        // ini soal status "sekarang", bukan riwayat). Ngitung akun UNIK,
+        // bukan jumlah aktivitas.
+        $loginHariIni = UserActivityLog::where('action', 'login')->whereDate('created_at', today())->get();
+        $userIdUnikLoginHariIni = $loginHariIni->pluck('user_id')->filter()->unique();
 
-        $rekapPerRole = [
-            'admin' => $loginHariIni->filter(fn ($log) => $log->user?->hasRole('admin'))->count(),
-            'user' => $loginHariIni->filter(fn ($log) => $log->user?->hasRole('user'))->count(),
-        ];
+        $rekapPerRole = ['admin' => 0, 'user' => 0];
+        foreach ($userIdUnikLoginHariIni as $uid) {
+            $u = User::find($uid);
+            if (!$u) {
+                continue;
+            }
+            if ($u->hasRole('admin')) {
+                $rekapPerRole['admin']++;
+            } elseif ($u->hasRole('user')) {
+                $rekapPerRole['user']++;
+            }
+        }
 
         $totalAdmin = User::role('admin')->count();
 
         // "Sedang aktif" (heuristik): ada login hari ini, TAPI belum ada
-        // logout SETELAH login terakhirnya. Dipakai buat nunjukin siapa yang
-        // masih login di luar jam kerja + kapan bakal di-auto-logout.
+        // logout SETELAH login terakhirnya.
         $jamKerjaSelesai = today()->setTime(18, 0);
         $sedangAktifDiLuarJamKerja = collect();
 
         if (now()->gt($jamKerjaSelesai) || now()->lt(today()->setTime(7, 0))) {
-            $userIds = $loginHariIni->pluck('user_id')->unique();
-
-            foreach ($userIds as $userId) {
+            foreach ($userIdUnikLoginHariIni as $userId) {
                 $user = User::find($userId);
                 if (!$user || $user->hasRole('admin')) {
                     continue; // admin gak kena batasan jam kerja
@@ -83,9 +103,10 @@ class UserActivityLogController extends Controller
         }
 
         return view('user-activity-log.index', [
-            'loginLogs' => $loginLogs,
-            'exportLogs' => $exportLogs,
-            'title' => 'Log Login & Export',
+            'adminLoginLogs' => $adminLoginLogs,
+            'userLoginLogs' => $userLoginLogs,
+            'failedLoginLogs' => $failedLoginLogs,
+            'title' => 'Log Login',
             'showAll' => $showAll,
             'rekapPerRole' => $rekapPerRole,
             'totalAdmin' => $totalAdmin,

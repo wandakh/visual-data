@@ -12,7 +12,7 @@
 
     <form action="{{ route('updatedata', $data->id) }}" method="POST" class="space-y-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
         @csrf
-        @include('partials.sales-form-fields', ['dropdownData' => $dropdownData, 'data' => $data])
+        @include('partials.sales-form-fields', ['dropdownData' => $dropdownData, 'data' => $data, 'lockedOrgCode' => $lockedOrgCode])
         <div class="flex justify-end border-t border-slate-100 pt-4">
             <button type="submit" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
                 @include('partials.icon', ['name' => 'pencil', 'class' => 'h-4 w-4'])

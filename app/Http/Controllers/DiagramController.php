@@ -17,17 +17,17 @@ class DiagramController extends Controller
 
     public function diagram(Request $request): View
     {
+        $user = auth()->user();
+        $isAdmin = $user->hasRole('admin');
+        $orgCode = $user->scopedOrgCode();
+
         $tanggal = $request->input('tanggal');
         $bulan = $request->input('bulan');
         $tahun = $request->input('tahun');
         $namaPerusahaan = $request->input('nama_perusahaan');
 
-        $query = SalesRecord::query();
+        $query = SalesRecord::query()->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode));
 
-        // Semua filter opsional & bisa dikombinasikan. Sengaja diturunkan dari
-        // kolom Tanggal (bukan kolom Bulan/Hari yang diisi manual saat input
-        // data), supaya hasilnya konsisten dan gak kena masalah data yang
-        // diketik beda-beda formatnya.
         if ($tanggal) {
             $query->whereDate('Tanggal', $tanggal);
         }
@@ -43,16 +43,8 @@ class DiagramController extends Controller
 
         $filtered = $query->get();
 
-        // Chart 1: jumlah transaksi per customer, dalam scope filter yang aktif
+        // Ringkasan "Transaksi Terbanyak" (dipakai dua-duanya, admin & karyawan)
         $customerCounts = $filtered->countBy('NAMA_CUSTOMER')->sortDesc();
-
-        // Chart 2: tren jumlah transaksi per bulan, dalam scope filter yang aktif
-        $perBulan = $filtered
-            ->groupBy(fn ($item) => Carbon::parse($item->Tanggal)->format('Y-m'))
-            ->map->count()
-            ->sortKeys();
-
-        // Ringkasan: customer dengan transaksi terbanyak + detail transaksinya
         $topCustomerName = $customerCounts->keys()->first();
         $topCustomerCount = $customerCounts->first();
         $topCustomerTransactions = $topCustomerName
@@ -60,29 +52,107 @@ class DiagramController extends Controller
             : collect();
 
         $dropdown['NAMA_CUSTOMER'] = SalesRecord::query()
+            ->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode))
             ->select('NAMA_CUSTOMER')->distinct()->pluck('NAMA_CUSTOMER', 'NAMA_CUSTOMER');
 
         $tahunTersedia = SalesRecord::query()
+            ->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode))
             ->selectRaw('DISTINCT YEAR(Tanggal) as tahun')
             ->orderByDesc('tahun')
             ->pluck('tahun');
 
-        return view('sales.diagram', [
+        $data = [
             'customerCounts' => $customerCounts,
-            'perBulan' => $perBulan,
             'topCustomerName' => $topCustomerName,
             'topCustomerCount' => $topCustomerCount,
             'topCustomerTransactions' => $topCustomerTransactions,
             'dropdown' => $dropdown,
             'namaBulan' => self::NAMA_BULAN,
             'tahunTersedia' => $tahunTersedia,
-            'filters' => [
-                'tanggal' => $tanggal,
-                'bulan' => $bulan,
-                'tahun' => $tahun,
-                'nama_perusahaan' => $namaPerusahaan,
-            ],
+            'filters' => compact('tanggal', 'bulan', 'tahun', 'namaPerusahaan'),
             'title' => 'Diagram',
-        ]);
+            'isAdmin' => $isAdmin,
+        ];
+
+        if ($isAdmin) {
+            return view('sales.diagram', array_merge($data, $this->chartsAdmin($filtered)));
+        }
+
+        return view('sales.diagram', array_merge($data, $this->chartsKaryawan($filtered)));
+    }
+
+    /**
+     * Admin: helicopter view — tren pendapatan vs keuntungan GLOBAL, ranking
+     * antar cabang, top customer GLOBAL (lintas cabang), komposisi produk.
+     */
+    private function chartsAdmin($filtered): array
+    {
+        $trenHarian = $filtered
+            ->groupBy(fn ($r) => Carbon::parse($r->Tanggal)->format('Y-m-d'))
+            ->map(fn ($rows) => [
+                'pendapatan' => round($rows->sum(fn ($r) => (float) $r->HARGA_JUAL)),
+                'keuntungan' => round($rows->sum(fn ($r) => (float) $r->Margin_INPPN + (float) $r->Margin_EXPPN)),
+            ])
+            ->sortKeys();
+
+        $topCabang = $filtered
+            ->groupBy('ORG_CODE')
+            ->map(fn ($rows, $org) => [
+                'org_code' => $org,
+                'jumlah_transaksi' => $rows->count(),
+                'pendapatan' => round($rows->sum(fn ($r) => (float) $r->HARGA_JUAL)),
+            ])
+            ->sortByDesc('jumlah_transaksi')
+            ->take(10)
+            ->values();
+
+        $topCustomerGlobal = $filtered
+            ->groupBy('NAMA_CUSTOMER')
+            ->map(fn ($rows, $nama) => [
+                'nama' => $nama,
+                'pendapatan' => round($rows->sum(fn ($r) => (float) $r->HARGA_JUAL)),
+            ])
+            ->sortByDesc('pendapatan')
+            ->take(10)
+            ->values();
+
+        $komposisiProduk = $filtered
+            ->groupBy(fn ($r) => $r->Type_Produk ?: 'Lainnya')
+            ->map->count()
+            ->sortDesc()
+            ->take(8);
+
+        return compact('trenHarian', 'topCabang', 'topCustomerGlobal', 'komposisiProduk');
+    }
+
+    /**
+     * Karyawan: fokus ke cabang sendiri. $filtered udah otomatis kefilter ke
+     * ORG_CODE mereka dari query utama, jadi gak perlu filter ulang di sini.
+     * Data margin/keuntungan SENGAJA gak dihitung/dikirim sama sekali.
+     */
+    private function chartsKaryawan($filtered): array
+    {
+        $trenTransaksiHarian = $filtered
+            ->groupBy(fn ($r) => Carbon::parse($r->Tanggal)->format('Y-m-d'))
+            ->map->count()
+            ->sortKeys();
+
+        $topCustomerCabang = $filtered
+            ->groupBy('NAMA_CUSTOMER')
+            ->map(fn ($rows, $nama) => [
+                'nama' => $nama,
+                'pendapatan' => round($rows->sum(fn ($r) => (float) $r->HARGA_JUAL)),
+            ])
+            ->sortByDesc('pendapatan')
+            ->take(10)
+            ->values();
+
+        $produkTerlarisCabang = $filtered
+            ->groupBy(fn ($r) => $r->Type_Produk ?: 'Lainnya')
+            ->map->count()
+            ->sortDesc()
+            ->take(8);
+
+        return compact('trenTransaksiHarian', 'topCustomerCabang', 'produkTerlarisCabang');
     }
 }

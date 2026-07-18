@@ -19,7 +19,9 @@ class ActivityLog extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        // withTrashed(): user yang udah dinonaktifkan (soft deleted) tetap
+        // kelihatan namanya di log, gak jadi null/hilang.
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     /**

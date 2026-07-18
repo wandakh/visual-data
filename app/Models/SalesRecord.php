@@ -35,9 +35,56 @@ class SalesRecord extends Model
     ];
 
     /**
-     * Kolom yang dropdown pilihannya diambil dari nilai unik yang sudah ada.
+     * Karyawan cuma boleh lihat data ORG_CODE-nya sendiri. Admin (scopedOrgCode
+     * balikin null) gak kefilter sama sekali — akses global.
      */
-    public static function dropdownOptions(): array
+    public function scopeForUser($query, User $user)
+    {
+        $orgCode = $user->scopedOrgCode();
+
+        return $orgCode ? $query->where('ORG_CODE', $orgCode) : $query;
+    }
+
+    /**
+     * Filter dipakai bareng-bareng oleh Dashboard (tampilan) dan Export
+     * Excel, supaya export SELALU ikut apa yang lagi difilter di layar
+     * (sebelumnya export punya filter sendiri yang gak nyambung).
+     */
+    public static function applyFilters($query, array $filters, bool $useCreatedAtDefault = false)
+    {
+        $adaFilterTanggalEksplisit = !empty($filters['start_date']) || !empty($filters['end_date']);
+
+        if ($useCreatedAtDefault && empty($filters['show_all']) && !$adaFilterTanggalEksplisit) {
+            $query->whereDate('created_at', today());
+        } else {
+            if (!empty($filters['start_date'])) {
+                $query->whereDate('Tanggal', '>=', $filters['start_date']);
+            }
+            if (!empty($filters['end_date'])) {
+                $query->whereDate('Tanggal', '<=', $filters['end_date']);
+            }
+        }
+
+        if (!empty($filters['customer_name'])) {
+            $query->where('NAMA_CUSTOMER', 'LIKE', '%' . $filters['customer_name'] . '%');
+        }
+
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('NAMA_CUSTOMER', 'LIKE', '%' . $filters['search'] . '%')
+                    ->orWhere('KODE_PRODUK', 'LIKE', '%' . $filters['search'] . '%');
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Kolom yang dropdown pilihannya diambil dari nilai unik yang sudah ada.
+     * Kalau $orgCode diisi (Karyawan), pilihannya dipersempit cuma dari data
+     * cabang itu aja.
+     */
+    public static function dropdownOptions(?string $orgCode = null): array
     {
         $columns = [
             'ORG_CODE', 'NAMA_CUSTOMER', 'KODE_PRODUK', 'AMMOUNT', 'HARGA_JUAL', 'TRX',
@@ -48,7 +95,9 @@ class SalesRecord extends Model
 
         $options = [];
         foreach ($columns as $column) {
-            $options[$column] = static::query()->select($column)->distinct()->pluck($column, $column);
+            $options[$column] = static::query()
+                ->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode))
+                ->select($column)->distinct()->pluck($column, $column);
         }
 
         return $options;
@@ -59,7 +108,7 @@ class SalesRecord extends Model
      * tertentu — soalnya tiap perusahaan biasanya punya kode/pola isian
      * sendiri (ORG_CODE, KODE_PRODUK, dst beda-beda per customer).
      */
-    public static function dropdownOptionsForCustomer(string $customerName): array
+    public static function dropdownOptionsForCustomer(string $customerName, ?string $orgCode = null): array
     {
         $columns = [
             'ORG_CODE', 'KODE_PRODUK', 'AMMOUNT', 'HARGA_JUAL', 'TRX',
@@ -72,6 +121,7 @@ class SalesRecord extends Model
         foreach ($columns as $column) {
             $options[$column] = static::query()
                 ->where('NAMA_CUSTOMER', $customerName)
+                ->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode))
                 ->select($column)->distinct()->pluck($column)->values();
         }
 

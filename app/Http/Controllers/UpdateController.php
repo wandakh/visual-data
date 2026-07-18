@@ -14,10 +14,17 @@ class UpdateController extends Controller
     public function tampilkandata(int $id): View
     {
         $data = SalesRecord::findOrFail($id);
+        $orgCode = Auth::user()->scopedOrgCode();
+
+        // Diperbaiki: Karyawan cuma boleh edit data ORG_CODE-nya sendiri.
+        if ($orgCode && $data->ORG_CODE !== $orgCode) {
+            abort(403, 'Data ini bukan milik cabang (ORG_CODE) kamu, gak bisa diedit.');
+        }
 
         return view('sales.edit', [
             'data' => $data,
-            'dropdownData' => SalesRecord::dropdownOptions(),
+            'dropdownData' => SalesRecord::dropdownOptions($orgCode),
+            'lockedOrgCode' => $orgCode,
             'title' => 'Update Data',
         ]);
     }
@@ -25,6 +32,11 @@ class UpdateController extends Controller
     public function updatedata(Request $request, int $id): RedirectResponse
     {
         $data = SalesRecord::findOrFail($id);
+        $orgCode = Auth::user()->scopedOrgCode();
+
+        if ($orgCode && $data->ORG_CODE !== $orgCode) {
+            abort(403, 'Data ini bukan milik cabang (ORG_CODE) kamu, gak bisa diedit.');
+        }
 
         $validated = $request->validate([
             'Tanggal' => 'required|date',
@@ -52,6 +64,11 @@ class UpdateController extends Controller
             'Bulan' => 'required',
             'KET_PROD' => 'required',
         ]);
+
+        // Karyawan gak bisa ganti ORG_CODE data ke cabang lain lewat edit.
+        if ($orgCode) {
+            $validated['ORG_CODE'] = $orgCode;
+        }
 
         $data->update($validated);
 

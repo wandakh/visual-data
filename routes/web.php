@@ -11,11 +11,18 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TambahDataController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\UserActivityLogController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+| Diperbaiki: gak ada lagi route registrasi publik (/sesi/register,
+| /sesi/create). Akun sekarang cuma dibuat Admin lewat /kelola-user.
+*/
+
 Route::middleware(['isLogin'])->group(function () {
-    // Route ini WAJIB tetap bisa diakses walau lagi di luar jam kerja,
-    // supaya user gak "terkunci total" tanpa jalan keluar.
     Route::get('/lembur', [OvertimeController::class, 'blocked'])->name('overtime.blocked');
     Route::post('/lembur/minta', [OvertimeController::class, 'store'])->name('overtime.store');
 
@@ -47,6 +54,15 @@ Route::middleware(['isLogin'])->group(function () {
         Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log')->middleware('can:delete-data');
         Route::get('/user-activity-log', [UserActivityLogController::class, 'index'])->name('user-activity-log')->middleware('can:delete-data');
 
+        Route::middleware('can:delete-data')->prefix('kelola-user')->name('user-management.')->group(function () {
+            Route::get('/', [UserManagementController::class, 'index'])->name('index');
+            Route::get('/tambah', [UserManagementController::class, 'create'])->name('create');
+            Route::post('/tambah', [UserManagementController::class, 'store'])->name('store');
+            Route::post('/{user}/org-code', [UserManagementController::class, 'updateOrgCode'])->name('org-code');
+            Route::post('/{user}/nonaktifkan', [UserManagementController::class, 'deactivate'])->name('deactivate');
+            Route::post('/{id}/aktifkan', [UserManagementController::class, 'reactivate'])->name('reactivate');
+        });
+
         Route::get('/diagram', [DiagramController::class, 'diagram'])->name('diagram');
 
         Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
@@ -57,8 +73,6 @@ Route::middleware(['isLogin'])->group(function () {
 Route::middleware(['isGuest'])->group(function () {
     Route::get('/sesi', [SessionController::class, 'index']);
     Route::post('/sesi/login', [SessionController::class, 'login'])->name('sesi.login')->middleware('throttle:5,1');
-    Route::get('/sesi/register', [SessionController::class, 'register'])->name('sesi.register');
-    Route::post('/sesi/create', [SessionController::class, 'create'])->name('sesi.create')->middleware('throttle:5,1');
 });
 
 Route::get('/sesi/logout', [SessionController::class, 'logout'])->name('sesi.logout');

@@ -54,13 +54,15 @@
             @endif
         @endif
     @endauth
-    <div class="flex min-h-screen">
+
+    <div class="fixed inset-0 flex overflow-hidden">
+        
         <!-- Sidebar -->
         <aside
-            class="fixed inset-y-0 left-0 z-30 flex w-64 -translate-x-full transform flex-col bg-[#0f1729] text-slate-300 transition-transform duration-200 md:static md:translate-x-0"
+            class="fixed inset-y-0 left-0 z-30 flex w-64 shrink-0 -translate-x-full transform flex-col bg-[#0f1729] text-slate-300 transition-transform duration-200 md:static md:translate-x-0"
             :class="sidebarOpen && '!translate-x-0'"
         >
-            <div class="flex h-16 items-center gap-3 border-b border-white/5 px-5">
+            <div class="flex h-16 shrink-0 items-center gap-3 border-b border-white/5 px-5">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center">
                     <img src="{{ asset('images/kisel.png') }}" alt="Logo" class="h-full w-full object-contain"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -101,20 +103,29 @@
                         @include('partials.icon', ['name' => 'clipboard', 'class' => 'h-5 w-5'])
                         Log Data
                     </a>
-                    <a href="{{ route('user-activity-log') }}" class="{{ ($title ?? '') === 'Log Login & Export' ? $active : $inactive }}">
+                    <a href="{{ route('user-activity-log') }}" class="{{ ($title ?? '') === 'Log Login' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'user', 'class' => 'h-5 w-5'])
-                        Log Login &amp; Export
+                        Log Login
+                    </a>
+                    <a href="{{ route('user-management.index') }}" class="{{ ($title ?? '') === 'Kelola User' ? $active : $inactive }}">
+                        @include('partials.icon', ['name' => 'building', 'class' => 'h-5 w-5'])
+                        Kelola User
                     </a>
                 @endcan
             </nav>
 
             @auth
-                <div class="border-t border-white/5 p-3">
+                <div class="shrink-0 border-t border-white/5 p-3">
                     <div class="flex items-center gap-2 rounded-lg px-2 py-2">
                         <img src="{{ auth()->user()->profilePhotoUrl() }}" class="h-8 w-8 rounded-full object-cover ring-2 ring-white/10">
                         <div class="min-w-0 flex-1 leading-tight">
                             <p class="truncate text-xs font-medium text-white">{{ auth()->user()->name }}</p>
-                            <p class="truncate text-[11px] text-slate-400">{{ auth()->user()->getRoleNames()->first() ?? '-' }}</p>
+                            <p class="truncate text-[11px] text-slate-400">
+                                {{ auth()->user()->getRoleNames()->first() ?? '-' }}
+                                @if (auth()->user()->scopedOrgCode())
+                                    &middot; {{ auth()->user()->scopedOrgCode() }}
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -124,9 +135,11 @@
         <div x-show="sidebarOpen" @click="sidebarOpen = false" x-cloak
              class="fixed inset-0 z-20 bg-black/30 md:hidden"></div>
 
-        <div class="flex flex-1 flex-col">
+        <!-- Sisi Kanan -->
+        <div class="flex flex-1 flex-col min-w-0">
+            
             <!-- Topbar -->
-            <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
+            <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
                 <div class="flex items-center gap-3">
                     <button class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden" @click="sidebarOpen = !sidebarOpen">
                         @include('partials.icon', ['name' => 'menu', 'class' => 'h-5 w-5'])
@@ -153,13 +166,22 @@
                 @endauth
             </header>
 
-            <main class="flex-1 p-4 sm:p-6">
-                @yield('content')
-            </main>
+            <!-- KUNCI PERBAIKAN FOOTER:
+                 1. Tambahkan flex flex-col di bungkus ini
+                 2. Beri flex-1 di tag <main> agar melar otomatis
+            -->
+            <div class="flex flex-1 flex-col overflow-y-auto bg-slate-50">
+                
+                <main class="flex-1 p-4 sm:p-6">
+                    @yield('content')
+                </main>
 
-            <footer class="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
-                &copy; Visual Data {{ date('Y') }}
-            </footer>
+                <footer class="shrink-0 border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
+                    &copy; Visual Data {{ date('Y') }}
+                </footer>
+                
+            </div>
+            
         </div>
     </div>
 </body>

@@ -5,7 +5,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Data Penjualan</h1>
-            <p class="text-sm text-slate-500">{{ $data->total() }} total transaksi tercatat{{ $filterActive ? ' (hari ini)' : '' }}</p>
+            <p class="text-sm text-slate-500">{{ $filterActive ? 'Data yang diinput hari ini' : 'Sesuai filter yang aktif' }}</p>
         </div>
         <div class="flex gap-2">
             @can('export-data')
@@ -35,16 +35,60 @@
         <div class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-100">{{ session('bisalogin') }}</div>
     @endif
 
+    <!-- Kartu statistik -->
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                @include('partials.icon', ['name' => 'chart-bar', 'class' => 'h-5 w-5'])
+            </div>
+            <div>
+                <p class="font-display text-xl font-bold text-slate-800">{{ number_format($stats['total_transaksi'], 0, ',', '.') }}</p>
+                <p class="text-xs text-slate-500">Total Transaksi</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                @include('partials.icon', ['name' => 'download', 'class' => 'h-5 w-5'])
+            </div>
+            <div>
+                <p class="font-display text-xl font-bold text-slate-800">Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p>
+                <p class="text-xs text-slate-500">Total Pendapatan</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                @include('partials.icon', ['name' => 'trophy', 'class' => 'h-5 w-5'])
+            </div>
+            <div>
+                <p class="font-display text-xl font-bold text-slate-800">{{ number_format($stats['total_customer'], 0, ',', '.') }}</p>
+                <p class="text-xs text-slate-500">Total Customer</p>
+            </div>
+        </div>
+    </div>
+
+    @include('partials.filter-status-badge', [
+        'showAll' => $showAll,
+        'urlSemua' => url('/database') . '?show_all=1',
+        'urlHariIni' => url('/database'),
+        'labelHariIni' => 'Menampilkan data yang diinput hari ini',
+    ])
+
     <!-- Filter -->
     <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-        @if ($filterActive)
-            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
-                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
-                &mdash;
-                <a href="{{ url('/database') }}?show_all=1" class="underline hover:text-indigo-800">Tampilkan Semua</a>
-            </p>
-        @endif
         <form action="{{ url('/database') }}" method="GET" class="flex flex-wrap items-end gap-3">
+            @if ($showAll)
+                <input type="hidden" name="show_all" value="1">
+            @endif
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-500">Cari (customer / kode produk)</label>
+                <div class="relative">
+                    <span class="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-slate-400">
+                        @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
+                    </span>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama customer atau kode produk..."
+                           class="w-64 rounded-lg border border-slate-300 py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+            </div>
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500">Tanggal mulai</label>
                 <input type="date" name="start_date" value="{{ request('start_date') }}"
@@ -72,7 +116,7 @@
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-900">
+            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-900">
                 @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
                 Filter
             </button>
@@ -123,7 +167,7 @@
                                     @endcan
                                     @can('delete-data')
                                         <button type="button"
-                                                @click="deleteTarget = { id: {{ $item->id }}, nama: @js($item->NAMA_CUSTOMER) }"
+                                                @click="deleteTarget = { id: {{ $item->id }}, nama: @js($item->NAMA_CUSTOMER), tanggal: @js(\Carbon\Carbon::parse($item->Tanggal)->format('d/m/Y')), amount: @js(number_format((float) $item->HARGA_JUAL, 0, ',', '.')) }"
                                                 class="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100">
                                             @include('partials.icon', ['name' => 'trash', 'class' => 'h-3.5 w-3.5'])
                                             Hapus
@@ -139,7 +183,9 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-12 text-center text-slate-400">Belum ada data</td>
+                            <td colspan="9">
+                                @include('partials.empty-state', ['icon' => 'clipboard', 'title' => 'Belum ada data penjualan', 'subtitle' => 'Coba ubah filter tanggal/customer, atau klik Tampilkan Semua.'])
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -150,7 +196,7 @@
             <p class="text-xs text-slate-500">
                 Menampilkan {{ $data->firstItem() ?? 0 }}&ndash;{{ $data->lastItem() ?? 0 }} dari {{ $data->total() }} data
             </p>
-            {{ $data->links() }}
+            {{ $data->links('vendor.pagination.custom') }}
         </div>
     </div>
 

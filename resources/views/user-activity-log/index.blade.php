@@ -7,24 +7,24 @@
             @include('partials.icon', ['name' => 'chevron-left', 'class' => 'h-4 w-4'])
             Kembali
         </a>
-        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Log Login & Export</h1>
+        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Log Login</h1>
     </div>
-    <p class="-mt-4 text-sm text-slate-500">Riwayat login, logout, dan export data oleh user &mdash; terpisah dari log perubahan data.</p>
+    <p class="-mt-4 text-sm text-slate-500">Riwayat login, logout, dan percobaan lembur oleh user. Export data sekarang ada di halaman Log Data.</p>
 
-    <!-- Rekap harian -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-            <p class="text-2xl font-bold text-slate-800">{{ $rekapPerRole['admin'] }}</p>
-            <p class="text-xs text-slate-500">Login Admin hari ini</p>
+    <!-- Rekap harian: selalu horizontal, gak nge-stack ke bawah -->
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <div class="w-full flex-1 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:p-4">
+            <p class="text-xl font-bold text-slate-800 sm:text-2xl">{{ $rekapPerRole['admin'] }}</p>
+            <p class="text-[11px] text-slate-500 sm:text-xs">Akun Admin login hari ini</p>
         </div>
-        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-            <p class="text-2xl font-bold text-slate-800">{{ $rekapPerRole['user'] }}</p>
-            <p class="text-xs text-slate-500">Login User hari ini</p>
+        <div class="w-full flex-1 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:p-4">
+            <p class="text-xl font-bold text-slate-800 sm:text-2xl">{{ $rekapPerRole['user'] }}</p>
+            <p class="text-[11px] text-slate-500 sm:text-xs">Akun User login hari ini</p>
         </div>
-        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 {{ $totalAdmin > 5 ? 'ring-2 ring-red-300' : '' }}">
-            <p class="text-2xl font-bold {{ $totalAdmin > 5 ? 'text-red-600' : 'text-slate-800' }}">{{ $totalAdmin }}</p>
-            <p class="text-xs {{ $totalAdmin > 5 ? 'text-red-600 font-medium' : 'text-slate-500' }}">
-                Total akun Admin {{ $totalAdmin > 5 ? '(melebihi batas 5!)' : '(maks. 5)' }}
+        <div class="w-full flex-1 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:p-4 {{ $totalAdmin > 5 ? 'ring-2 ring-red-300' : '' }}">
+            <p class="text-xl font-bold sm:text-2xl {{ $totalAdmin > 5 ? 'text-red-600' : 'text-slate-800' }}">{{ $totalAdmin }}</p>
+            <p class="text-[11px] sm:text-xs {{ $totalAdmin > 5 ? 'text-red-600 font-medium' : 'text-slate-500' }}">
+                Total akun Admin{{ $totalAdmin > 5 ? ' (lebih dari 5!)' : ' (maks. 5)' }}
             </p>
         </div>
     </div>
@@ -49,16 +49,21 @@
         </div>
     @endif
 
+    @include('partials.filter-status-badge', [
+        'showAll' => $showAll,
+        'urlSemua' => route('user-activity-log') . '?show_all=1',
+        'urlHariIni' => route('user-activity-log'),
+        'labelHariIni' => 'Menampilkan aktivitas hari ini',
+    ])
+
     <!-- Filter tanggal -->
     <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-        @if (!$showAll)
-            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
-                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
-                Nampilin aktivitas hari ini aja &mdash;
-                <a href="{{ route('user-activity-log') }}?show_all=1" class="underline hover:text-indigo-800">Tampilkan Semua</a>
-            </p>
-        @endif
         <form action="{{ route('user-activity-log') }}" method="GET" class="flex flex-wrap items-end gap-3">
+            {{-- Diperbaiki: hidden field ini yang bikin pilihan "Tampilkan Semua"
+                 gak ke-reset kalau user submit filter tanggal lain setelahnya. --}}
+            @if ($showAll)
+                <input type="hidden" name="show_all" value="1">
+            @endif
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500">Dari tanggal</label>
                 <input type="date" name="start_date" value="{{ request('start_date') }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
@@ -67,18 +72,53 @@
                 <label class="mb-1 block text-xs font-medium text-slate-500">Sampai tanggal</label>
                 <input type="date" name="end_date" value="{{ request('end_date') }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
-            <button type="submit" class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
                 @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
                 Filter
             </button>
         </form>
     </div>
 
-    <!-- Card: Login & Logout -->
+    <!-- Card: Login & Logout - Admin -->
+    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
+            @include('partials.icon', ['name' => 'user', 'class' => 'h-4 w-4 text-indigo-500'])
+            <h2 class="text-sm font-semibold text-slate-600">Login & Logout &mdash; Admin</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Waktu</th>
+                        <th class="px-4 py-3 text-left">User</th>
+                        <th class="px-4 py-3 text-left">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($adminLoginLogs as $log)
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="px-4 py-3 tabular-nums whitespace-nowrap text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-4 py-3 font-medium text-slate-700">{{ $log->user?->name ?? '-' }}</td>
+                            <td class="px-4 py-3">
+                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $log->action === 'login' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' }}">{{ $log->action }}</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3">@include('partials.empty-state', ['icon' => 'user', 'title' => 'Belum ada aktivitas admin'])</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if ($adminLoginLogs->hasPages())
+            <div class="border-t border-slate-100 px-4 py-3">{{ $adminLoginLogs->links('vendor.pagination.custom') }}</div>
+        @endif
+    </div>
+
+    <!-- Card: Login & Logout - User -->
     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
         <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
             @include('partials.icon', ['name' => 'user', 'class' => 'h-4 w-4 text-slate-400'])
-            <h2 class="text-sm font-semibold text-slate-600">Login & Logout</h2>
+            <h2 class="text-sm font-semibold text-slate-600">Login & Logout &mdash; User</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-100 text-sm">
@@ -91,11 +131,10 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse ($loginLogs as $log)
+                    @forelse ($userLoginLogs as $log)
                         @php
                             $warna = match ($log->action) {
                                 'login' => 'bg-green-50 text-green-700',
-                                'login_failed' => 'bg-red-50 text-red-700',
                                 'overtime_request' => 'bg-amber-50 text-amber-700',
                                 default => 'bg-slate-100 text-slate-600',
                             };
@@ -103,58 +142,48 @@
                         <tr class="hover:bg-slate-50/70">
                             <td class="px-4 py-3 tabular-nums whitespace-nowrap text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
                             <td class="px-4 py-3 font-medium text-slate-700">{{ $log->user?->name ?? '-' }}</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $warna }}">
-                                    {{ $log->action }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-500">{{ in_array($log->action, ['login_failed', 'overtime_request']) ? $log->description : '' }}</td>
+                            <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-medium {{ $warna }}">{{ $log->action }}</span></td>
+                            <td class="px-4 py-3 text-slate-500">{{ $log->action === 'overtime_request' ? $log->description : '' }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="4" class="px-4 py-10 text-center text-slate-400">Belum ada aktivitas login</td>
-                        </tr>
+                        <tr><td colspan="4">@include('partials.empty-state', ['icon' => 'user', 'title' => 'Belum ada aktivitas user'])</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($loginLogs->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3">{{ $loginLogs->links() }}</div>
+        @if ($userLoginLogs->hasPages())
+            <div class="border-t border-slate-100 px-4 py-3">{{ $userLoginLogs->links('vendor.pagination.custom') }}</div>
         @endif
     </div>
 
-    <!-- Card: Export -->
+    <!-- Card: Percobaan Login Gagal -->
     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
         <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-            @include('partials.icon', ['name' => 'download', 'class' => 'h-4 w-4 text-slate-400'])
-            <h2 class="text-sm font-semibold text-slate-600">Export Data</h2>
+            @include('partials.icon', ['name' => 'x-mark', 'class' => 'h-4 w-4 text-red-400'])
+            <h2 class="text-sm font-semibold text-slate-600">Percobaan Login Gagal</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-100 text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-4 py-3 text-left">Waktu</th>
-                        <th class="px-4 py-3 text-left">User</th>
                         <th class="px-4 py-3 text-left">Detail</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse ($exportLogs as $log)
+                    @forelse ($failedLoginLogs as $log)
                         <tr class="hover:bg-slate-50/70">
                             <td class="px-4 py-3 tabular-nums whitespace-nowrap text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="px-4 py-3 font-medium text-slate-700">{{ $log->user?->name ?? '-' }}</td>
                             <td class="px-4 py-3 text-slate-600">{{ $log->description }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="3" class="px-4 py-10 text-center text-slate-400">Belum ada export tercatat</td>
-                        </tr>
+                        <tr><td colspan="2">@include('partials.empty-state', ['icon' => 'check-circle', 'title' => 'Gak ada percobaan gagal', 'subtitle' => 'Bagus, tidak ada indikasi percobaan login yang mencurigakan.'])</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($exportLogs->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3">{{ $exportLogs->links() }}</div>
+        @if ($failedLoginLogs->hasPages())
+            <div class="border-t border-slate-100 px-4 py-3">{{ $failedLoginLogs->links('vendor.pagination.custom') }}</div>
         @endif
     </div>
 </div>

@@ -19,7 +19,7 @@
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" @click="open = false" class="rounded-lg px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                <button type="submit" data-loading-text="Mengimport... (bisa beberapa menit)" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                     @include('partials.icon', ['name' => 'upload', 'class' => 'h-4 w-4'])
                     Import
                 </button>

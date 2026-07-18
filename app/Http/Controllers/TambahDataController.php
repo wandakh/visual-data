@@ -13,30 +13,31 @@ class TambahDataController extends Controller
 {
     public function tampilkanCreateForm(): View
     {
+        $orgCode = Auth::user()->scopedOrgCode();
+
         return view('sales.create', [
-            'dropdownData' => SalesRecord::dropdownOptions(),
+            'dropdownData' => SalesRecord::dropdownOptions($orgCode),
+            'lockedOrgCode' => $orgCode,
             'title' => 'Create Data',
         ]);
     }
 
-    /**
-     * Endpoint JSON: dipanggil lewat AJAX dari form create/edit begitu user
-     * milih/ngetik nama customer, buat nyesuain isi dropdown kolom lain
-     * (ORG_CODE, KODE_PRODUK, dst) sesuai histori data customer itu aja.
-     */
     public function optionsForCustomer(Request $request): \Illuminate\Http\JsonResponse
     {
         $customer = $request->query('customer');
+        $orgCode = Auth::user()->scopedOrgCode();
 
         if (!$customer) {
-            return response()->json(SalesRecord::dropdownOptions());
+            return response()->json(SalesRecord::dropdownOptions($orgCode));
         }
 
-        return response()->json(SalesRecord::dropdownOptionsForCustomer($customer));
+        return response()->json(SalesRecord::dropdownOptionsForCustomer($customer, $orgCode));
     }
 
     public function insertdata(Request $request): RedirectResponse
     {
+        $orgCode = Auth::user()->scopedOrgCode();
+
         $validated = $request->validate([
             'Tanggal' => 'required|date',
             'ORG_CODE' => 'required',
@@ -63,6 +64,13 @@ class TambahDataController extends Controller
             'Bulan' => 'required',
             'KET_PROD' => 'required',
         ]);
+
+        // Diperbaiki: Karyawan cuma boleh input data buat ORG_CODE mereka
+        // sendiri — dipaksa di server (bukan cuma dikunci di tampilan),
+        // jadi walaupun form-nya dioprek manual tetap ke-block.
+        if ($orgCode) {
+            $validated['ORG_CODE'] = $orgCode;
+        }
 
         $data = SalesRecord::create($validated);
 

@@ -31,6 +31,12 @@
                 <dt class="text-slate-500">Email</dt>
                 <dd class="font-medium text-slate-800">{{ auth()->user()->email }}</dd>
             </div>
+            @if (auth()->user()->scopedOrgCode())
+                <div class="flex justify-between py-3">
+                    <dt class="text-slate-500">ORG_CODE (cabang)</dt>
+                    <dd class="font-medium text-slate-800">{{ auth()->user()->scopedOrgCode() }}</dd>
+                </div>
+            @endif
             <div class="flex justify-between py-3">
                 <dt class="text-slate-500">Bergabung</dt>
                 <dd class="font-medium text-slate-800">{{ auth()->user()->created_at->format('d M Y') }}</dd>

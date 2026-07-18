@@ -13,37 +13,41 @@ class DatabaseController extends Controller
 {
     public function index(Request $request): View
     {
+        $orgCode = auth()->user()->scopedOrgCode();
+
         $dropdown['NAMA_CUSTOMER'] = SalesRecord::query()
+            ->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode))
             ->select('NAMA_CUSTOMER')->distinct()->pluck('NAMA_CUSTOMER', 'NAMA_CUSTOMER');
 
         $perPage = (int) $request->input('per_page', 10);
         $showAll = $request->boolean('show_all');
 
-        $query = SalesRecord::query();
+        $filters = [
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+            'customer_name' => $request->input('customer_name'),
+            'search' => $request->input('search'),
+            'show_all' => $showAll,
+        ];
 
-        // Diperbaiki: default-nya sekarang "Hari Ini" (optimasi loading buat
-        // tabel yang isinya 200 ribu+ baris) — kecuali user eksplisit pilih
-        // tanggal lain, atau klik "Tampilkan Semua".
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
+        $baseQuery = fn () => SalesRecord::query()->when($orgCode, fn ($q) => $q->where('ORG_CODE', $orgCode));
 
-        if (!$showAll && !$startDate && !$endDate) {
-            $startDate = $endDate = today()->toDateString();
-        }
-
-        if ($startDate) {
-            $query->whereDate('Tanggal', '>=', $startDate);
-        }
-
-        if ($endDate) {
-            $query->whereDate('Tanggal', '<=', $endDate);
-        }
-
-        if ($request->filled('customer_name')) {
-            $query->where('NAMA_CUSTOMER', 'LIKE', '%' . $request->string('customer_name') . '%');
-        }
+        $query = SalesRecord::applyFilters($baseQuery(), $filters, useCreatedAtDefault: true);
 
         $data = $query->orderBy('id')->paginate($perPage)->withQueryString();
+
+        // Card statistik — dihitung dari scope filter yang SAMA kayak tabel
+        // di bawahnya (bukan dari keseluruhan tabel), biar konsisten.
+        $statsQuery = SalesRecord::applyFilters($baseQuery(), $filters, useCreatedAtDefault: true);
+        $semuaDataTerfilter = $statsQuery->get(['AMMOUNT', 'HARGA_JUAL', 'NAMA_CUSTOMER']);
+
+        $stats = [
+            'total_transaksi' => $semuaDataTerfilter->count(),
+            'total_pendapatan' => $semuaDataTerfilter->sum(fn ($r) => (float) $r->HARGA_JUAL),
+            'total_customer' => $semuaDataTerfilter->pluck('NAMA_CUSTOMER')->unique()->count(),
+        ];
+
+        $defaultHariIni = !$showAll && !$filters['start_date'] && !$filters['end_date'];
 
         return view('sales.index', [
             'data' => $data,
@@ -51,7 +55,8 @@ class DatabaseController extends Controller
             'title' => 'Home',
             'request' => $request,
             'showAll' => $showAll,
-            'filterActive' => !$showAll && $startDate,
+            'filterActive' => $defaultHariIni,
+            'stats' => $stats,
         ]);
     }
 
@@ -86,7 +91,14 @@ class DatabaseController extends Controller
 
     public function show(int $id): SalesRecord
     {
-        return SalesRecord::findOrFail($id);
+        $data = SalesRecord::findOrFail($id);
+
+        $orgCode = auth()->user()->scopedOrgCode();
+        if ($orgCode && $data->ORG_CODE !== $orgCode) {
+            abort(403, 'Data ini bukan milik cabang (ORG_CODE) kamu');
+        }
+
+        return $data;
     }
 
     /**

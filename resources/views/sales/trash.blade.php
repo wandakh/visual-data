@@ -19,30 +19,32 @@
     @endif
 
     <!-- Widget rekap per alasan -->
-<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-    @foreach (\App\Models\SalesRecord::ALASAN_HAPUS as $value => $label)
-        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-            <p class="text-2xl font-bold text-slate-800">{{ $rekapAlasan[$value] ?? 0 }}</p>
-            <p class="text-xs text-slate-500">{{ $label }}</p>
+  <!-- Widget rekap per alasan: Paksa ke samping dengan Flexbox -->
+<div class="flex w-full gap-3 sm:gap-4">
+    @forelse (\App\Models\SalesRecord::ALASAN_HAPUS as $value => $label)
+        <div class="flex-1 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:p-4">
+            <p class="text-xl font-bold text-slate-800 sm:text-2xl">{{ $rekapAlasan[$value] ?? 0 }}</p>
+            <p class="text-[11px] text-slate-500 sm:text-xs">{{ $label }}</p>
         </div>
-    @endforeach
+    @empty
+        <p class="w-full text-sm text-slate-500">No records found.</p>
+    @endforelse
 </div>
+
+    @include('partials.filter-status-badge', [
+        'showAll' => $showAll,
+        'urlSemua' => route('database.trash') . '?show_all=1',
+        'urlHariIni' => route('database.trash'),
+        'labelHariIni' => 'Menampilkan yang dihapus hari ini',
+        'labelSemua' => 'Menampilkan semua data terhapus',
+    ])
+
     <!-- Filter tanggal -->
-   <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-        @if (!$showAll)
-            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
-                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
-                Hanya menampilkan data hari ini &mdash;
-                <a href="{{ route('database.trash') }}?show_all=1" class="underline hover:text-indigo-800">Tampilkan Semua</a>
-            </p>
-        @else
-            <p class="mb-3 flex items-center gap-2 text-xs font-medium text-indigo-600">
-                @include('partials.icon', ['name' => 'filter', 'class' => 'h-3.5 w-3.5'])
-                Menampilkan semua data &mdash;
-                <a href="{{ route('database.trash') }}" class="underline hover:text-indigo-800">Tampilkan Hari Ini Saja</a>
-            </p>
-        @endif
+    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
         <form action="{{ route('database.trash') }}" method="GET" class="flex flex-wrap items-end gap-3">
+            @if ($showAll)
+                <input type="hidden" name="show_all" value="1">
+            @endif
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500">Dihapus dari tanggal</label>
                 <input type="date" name="start_date" value="{{ request('start_date') }}"
@@ -53,7 +55,7 @@
                 <input type="date" name="end_date" value="{{ request('end_date') }}"
                        class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
-            <button type="submit" class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
                 @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
                 Filter
             </button>
@@ -78,7 +80,9 @@
                     @forelse ($data as $item)
                         @php
                             $batasWaktu = $item->deleted_at->addDay();
-                            $sisaJam = max(0, now()->diffInHours($batasWaktu, false));
+                            $totalMenit = max(0, (int) now()->diffInMinutes($batasWaktu, false));
+                            $sisaJam = intdiv($totalMenit, 60);
+                            $sisaMenit = $totalMenit % 60;
                         @endphp
                         <tr class="hover:bg-slate-50/70">
                             <td class="px-4 py-3 text-slate-400">{{ $data->firstItem() + $loop->index }}</td>
@@ -87,8 +91,8 @@
                             <td class="px-4 py-3 text-slate-600">{{ \App\Models\SalesRecord::ALASAN_HAPUS[$item->deleted_reason] ?? '-' }}</td>
                             <td class="px-4 py-3 tabular-nums text-slate-500">{{ $item->deleted_at->format('d/m/Y H:i') }}</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $sisaJam <= 4 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700' }}">
-                                    &sim;{{ $sisaJam }} jam lagi
+                                <span class="rounded-full px-2 py-1 text-xs font-medium {{ $totalMenit <= 240 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700' }}">
+                                    {{ $sisaJam }}j {{ $sisaMenit }}m lagi
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right">
@@ -104,14 +108,16 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-slate-400">Belum ada data</td>
+                            <td colspan="7">
+                                @include('partials.empty-state', ['icon' => 'trash', 'title' => 'Gak ada data terhapus', 'subtitle' => 'Data yang dihapus bakal muncul di sini selama 24 jam.'])
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         <div class="border-t border-slate-100 px-4 py-4">
-            {{ $data->links() }}
+            {{ $data->links('vendor.pagination.custom') }}
         </div>
     </div>
 </div>

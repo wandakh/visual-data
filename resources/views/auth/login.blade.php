@@ -33,7 +33,4 @@
             Login
         </button>
     </form>
-    <p class="mt-4 text-center text-sm text-slate-500">
-        Belum punya akun? <a href="/sesi/register" class="font-medium text-indigo-600 hover:underline">Daftar</a>
-    </p>
 @endsection
