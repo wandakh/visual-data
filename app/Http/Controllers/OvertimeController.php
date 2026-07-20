@@ -41,8 +41,7 @@ class OvertimeController extends Controller
             'duration_minutes' => 'required|integer|min:15|max:480', // maks 8 jam
         ]);
 
-        $grantedUntil = now()->addMinutes($validated['duration_minutes']);
-
+$grantedUntil = now()->addMinutes((int) $validated['duration_minutes']);
         OvertimeRequest::create([
             'user_id' => Auth::id(),
             'reason' => $validated['reason'],

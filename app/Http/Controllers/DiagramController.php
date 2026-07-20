@@ -70,7 +70,7 @@ class DiagramController extends Controller
             'namaBulan' => self::NAMA_BULAN,
             'tahunTersedia' => $tahunTersedia,
             'filters' => compact('tanggal', 'bulan', 'tahun', 'namaPerusahaan'),
-            'title' => 'Diagram',
+            'title' => 'Analitik',
             'isAdmin' => $isAdmin,
         ];
 

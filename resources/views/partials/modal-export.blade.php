@@ -8,9 +8,7 @@
             </button>
         </div>
         <form action="{{ route('database.export') }}" method="GET" class="space-y-4">
-            {{-- Diperbaiki: export sekarang otomatis ikut filter yang lagi
-                 aktif di Dashboard (tanggal/pencarian/show_all) — jadi kalau
-                 kamu lagi liat "Hari Ini" doang, yang ke-export juga cuma itu. --}}
+         
             @if (request('start_date'))<input type="hidden" name="start_date" value="{{ request('start_date') }}">@endif
             @if (request('end_date'))<input type="hidden" name="end_date" value="{{ request('end_date') }}">@endif
             @if (request('search'))<input type="hidden" name="search" value="{{ request('search') }}">@endif
@@ -41,10 +39,10 @@
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" @click="open = false" class="rounded-lg px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Batal</button>
-                <button type="submit" data-loading-text="Menyiapkan file..." class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-                    @include('partials.icon', ['name' => 'download', 'class' => 'h-4 w-4'])
-                    Export
-                </button>
+                <button type="submit" @click="setTimeout(() => open = false, 500)" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+    @include('partials.icon', ['name' => 'download', 'class' => 'h-4 w-4'])
+    Export Data
+</button>
             </div>
         </form>
     </div>

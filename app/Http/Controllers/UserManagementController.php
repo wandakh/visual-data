@@ -9,29 +9,27 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
-/**
- * Cuma bisa diakses Admin (dicek lewat permission 'delete-data' sebagai
- * proxy "level akses admin", sama seperti Log Data & Log Login & Export
- * yang juga admin-only — lihat routes/web.php).
- */
+
 class UserManagementController extends Controller
 {
-    public function index(): View
+   public function index(): View
     {
+        // Ambil data user aktif (yang tidak di-soft delete)
         $activeUsers = User::withoutTrashed()
             ->with('roles')
             ->orderBy('name')
-            ->paginate(10, ['*'], 'active_page'); // Pakai penamaan page khusus agar tidak bentrok
+            ->paginate(10, ['*'], 'active_page');
 
+        // Ambil data user nonaktif (yang sudah di-soft delete / trashed)
         $inactiveUsers = User::onlyTrashed()
             ->with('roles')
             ->orderBy('name')
-            ->paginate(10, ['*'], 'inactive_page'); 
+            ->paginate(10, ['*'], 'inactive_page');
 
         return view('user-management.index', [
             'activeUsers' => $activeUsers,
             'inactiveUsers' => $inactiveUsers,
-            'title' => 'Kelola User',
+            'title' => 'Pengaturan',
         ]);
     }
 
@@ -67,7 +65,10 @@ class UserManagementController extends Controller
         return redirect()->route('user-management.index')->with('success', "Akun {$user->name} berhasil dibuat sebagai " . ($validated['role'] === 'admin' ? 'Admin' : 'Karyawan'));
     }
 
-    
+    /**
+     * Khusus buat nge-set/ganti ORG_CODE user yang udah ada (penting buat
+     * akun lama yang dibuat sebelum fitur ORG_CODE ada).
+     */
     public function updateOrgCode(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
@@ -79,7 +80,10 @@ class UserManagementController extends Controller
         return redirect()->route('user-management.index')->with('success', "ORG_CODE {$user->name} berhasil diupdate");
     }
 
-   
+    /**
+     * Nonaktifkan akun (soft delete) — buat karyawan resign. Gak bisa login
+     * lagi, tapi riwayat log-nya tetap aman/nyambung ke nama mereka.
+     */
     public function deactivate(User $user): RedirectResponse
     {
         if ($user->id === auth()->id()) {

@@ -59,9 +59,6 @@ class ExcelController extends Controller
         $exportType = $request->export_type;
         $orgCode = Auth::user()->scopedOrgCode();
 
-        // Diperbaiki: export sekarang ikut SEMUA filter yang lagi aktif di
-        // Dashboard (tanggal, search, show_all) — sebelumnya cuma filter
-        // nama customer dari dalam modal doang, gak nyambung ke tampilan.
         $filters = [
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),

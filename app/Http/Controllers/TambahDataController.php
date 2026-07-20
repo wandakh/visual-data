@@ -18,7 +18,7 @@ class TambahDataController extends Controller
         return view('sales.create', [
             'dropdownData' => SalesRecord::dropdownOptions($orgCode),
             'lockedOrgCode' => $orgCode,
-            'title' => 'Create Data',
+            'title' => 'Input Data',
         ]);
     }
 
@@ -65,9 +65,7 @@ class TambahDataController extends Controller
             'KET_PROD' => 'required',
         ]);
 
-        // Diperbaiki: Karyawan cuma boleh input data buat ORG_CODE mereka
-        // sendiri — dipaksa di server (bukan cuma dikunci di tampilan),
-        // jadi walaupun form-nya dioprek manual tetap ke-block.
+      
         if ($orgCode) {
             $validated['ORG_CODE'] = $orgCode;
         }

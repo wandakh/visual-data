@@ -52,7 +52,7 @@ class DatabaseController extends Controller
         return view('sales.index', [
             'data' => $data,
             'dropdown' => $dropdown,
-            'title' => 'Home',
+            'title' => 'Dashboard',
             'request' => $request,
             'showAll' => $showAll,
             'filterActive' => $defaultHariIni,
@@ -101,11 +101,7 @@ class DatabaseController extends Controller
         return $data;
     }
 
-    /**
-     * Halaman "Data Terhapus". Sebelum nampilin daftar, bersihin dulu (hapus
-     * PERMANEN) data yang udah lewat 24 jam di trash -> sesuai kebijakan
-     * retensi: lewat 24 jam gak bisa dipulihkan lagi.
-     */
+  
     public function trash(Request $request): View
     {
         $kadaluarsa = SalesRecord::onlyTrashed()
@@ -137,14 +133,14 @@ class DatabaseController extends Controller
 
         $data = (clone $query)->latest('deleted_at')->paginate(15)->withQueryString();
 
-        // Widget rekap: total hapus per alasan, dalam scope filter yang sama.
+        // Widget rekap: total hapus per alasan
         $rekapAlasan = (clone $query)->selectRaw('deleted_reason, COUNT(*) as total')
             ->groupBy('deleted_reason')
             ->pluck('total', 'deleted_reason');
 
         return view('sales.trash', [
             'data' => $data,
-            'title' => 'Data Terhapus',
+            'title' => 'Database',
             'showAll' => $showAll,
             'rekapAlasan' => $rekapAlasan,
         ]);
@@ -158,9 +154,7 @@ class DatabaseController extends Controller
             return redirect()->route('database.trash')->with('error', 'Data tidak ditemukan di daftar terhapus');
         }
 
-        // Jaga-jaga: kalau restore diakses langsung lewat URL (bukan dari
-        // halaman trash yang udah nge-purge otomatis), tetap cegah restore
-        // data yang harusnya udah kadaluarsa.
+      
         if ($data->deleted_at->lt(now()->subDay())) {
             return redirect()->route('database.trash')->with('error', 'Data ini sudah lebih dari 24 jam di trash, gak bisa dipulihkan lagi');
         }

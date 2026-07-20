@@ -7,7 +7,7 @@
             @include('partials.icon', ['name' => 'chevron-left', 'class' => 'h-4 w-4'])
             Kembali
         </a>
-        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Tambah Data</h1>
+        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Tambah Data Transaksi</h1>
     </div>
 
     <div x-data="{

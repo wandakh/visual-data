@@ -9,11 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-/**
- * Diperbaiki total: register() & create() dihapus dari sini. Sekarang gak
- * ada lagi pendaftaran akun terbuka buat publik — akun cuma dibuat Admin
- * lewat halaman Kelola User (lihat UserManagementController).
- */
 class SessionController extends Controller
 {
     public function index(): View

@@ -44,8 +44,7 @@
                             window.location.href = '/sesi/logout';
                         }
                     }"
-                    x-init="tick(); setInterval(() => tick(), 1000)"
-                >
+                    x-init="tick(); setInterval(() => tick(), 1000)">
                     <div x-show="showWarning" x-cloak x-transition
                          class="fixed inset-x-0 top-0 z-[60] bg-amber-500 px-4 py-2 text-center text-sm font-medium text-white shadow-md">
                         Sesi kamu bakal berakhir otomatis dalam <span x-text="Math.floor(secondsLeft / 60) + ' menit ' + (secondsLeft % 60) + ' detik'"></span> (jam kerja habis). Simpan pekerjaan kamu sekarang.
@@ -78,38 +77,38 @@
                 @php $active = 'flex items-center gap-3 rounded-lg border-l-2 border-indigo-400 bg-white/5 px-3 py-2.5 text-sm font-medium text-white'; @endphp
                 @php $inactive = 'flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white'; @endphp
 
-                <a href="{{ url('/database') }}" class="{{ ($title ?? '') === 'Home' ? $active : $inactive }}">
+                <a href="{{ url('/database') }}" class="{{ ($title ?? '') === 'Dashboard' ? $active : $inactive }}">
                     @include('partials.icon', ['name' => 'dashboard', 'class' => 'h-5 w-5'])
                     Dashboard
                 </a>
                 @can('create-data')
-                    <a href="{{ route('tambahdata') }}" class="{{ ($title ?? '') === 'Create Data' ? $active : $inactive }}">
+                    <a href="{{ route('tambahdata') }}" class="{{ ($title ?? '') === 'Input Data' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'plus-circle', 'class' => 'h-5 w-5'])
-                        Tambah Data
+                        Input Data
                     </a>
                 @endcan
-                <a href="{{ route('diagram') }}" class="{{ ($title ?? '') === 'Diagram' ? $active : $inactive }}">
+                <a href="{{ route('diagram') }}" class="{{ ($title ?? '') === 'Analitik' ? $active : $inactive }}">
                     @include('partials.icon', ['name' => 'chart-bar', 'class' => 'h-5 w-5'])
-                    Diagram
+                    Statistik
                 </a>
 
                 @can('delete-data')
                     <p class="px-3 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Admin</p>
-                    <a href="{{ route('database.trash') }}" class="{{ ($title ?? '') === 'Data Terhapus' ? $active : $inactive }}">
+                    <a href="{{ route('database.trash') }}" class="{{ ($title ?? '') === 'Database' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'trash', 'class' => 'h-5 w-5'])
-                        Data Terhapus
+                        Arsip Sampah
                     </a>
-                    <a href="{{ route('activity-log') }}" class="{{ ($title ?? '') === 'Log Data' ? $active : $inactive }}">
+                    <a href="{{ route('activity-log') }}" class="{{ ($title ?? '') === 'Jejak Audit' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'clipboard', 'class' => 'h-5 w-5'])
-                        Log Data
+                        Riwayat Sistem
                     </a>
-                    <a href="{{ route('user-activity-log') }}" class="{{ ($title ?? '') === 'Log Login' ? $active : $inactive }}">
+                    <a href="{{ route('user-activity-log') }}" class="{{ ($title ?? '') === 'Log Sesi' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'user', 'class' => 'h-5 w-5'])
-                        Log Login
+                        Riwayat Akses
                     </a>
-                    <a href="{{ route('user-management.index') }}" class="{{ ($title ?? '') === 'Kelola User' ? $active : $inactive }}">
+                    <a href="{{ route('user-management.index') }}" class="{{ ($title ?? '') === 'Pengaturan' ? $active : $inactive }}">
                         @include('partials.icon', ['name' => 'building', 'class' => 'h-5 w-5'])
-                        Kelola User
+                        Manajemen Akun
                     </a>
                 @endcan
             </nav>
@@ -166,10 +165,8 @@
                 @endauth
             </header>
 
-            <!-- KUNCI PERBAIKAN FOOTER:
-                 1. Tambahkan flex flex-col di bungkus ini
-                 2. Beri flex-1 di tag <main> agar melar otomatis
-            -->
+           
+            
             <div class="flex flex-1 flex-col overflow-y-auto bg-slate-50">
                 
                 <main class="flex-1 p-4 sm:p-6">
@@ -184,5 +181,58 @@
             
         </div>
     </div>
+    
+    @if (session()->has('success') || session()->has('error'))
+        <div x-data="{ show: true }"
+             x-init="setTimeout(() => show = false, 3000)"
+             x-show="show"
+             x-transition:enter="transform ease-out duration-300 transition"
+             x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-4"
+             x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0 sm:translate-x-4"
+             class="fixed bottom-4 right-4 z-[99] flex w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5 sm:bottom-6 sm:right-6"
+             x-cloak>
+
+            <div class="p-4 w-full">
+                <div class="flex items-start gap-3">
+                    
+                    <!-- Icon Sukses (Hijau) -->
+                    @if(session()->has('success'))
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    <!-- Icon Error (Merah) -->
+                    @elseif(session()->has('error'))
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                    @endif
+
+                    <div class="flex-1 pt-1">
+                        <p class="text-sm font-medium text-slate-800">
+                            {{ session('success') ?? session('error') }}
+                        </p>
+                    </div>
+                    
+                    <!-- Tombol Close (X) -->
+                    <div class="flex shrink-0">
+                        <button @click="show = false" type="button" class="inline-flex rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-500 p-1">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    @endif
+    
 </body>
 </html>

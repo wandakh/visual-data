@@ -29,11 +29,7 @@ class UserActivityLogController extends Controller
             }
         };
 
-        // Dipisah jadi 3 tabel biar gak kecampur — Admin, User, dan
-        // percobaan login gagal (gak ada user_id-nya karena kredensial
-        // gak match siapapun, jadi gak bisa dikelompokkan ke role manapun).
-        // Diperbaiki: export udah GAK ADA lagi di sini — dipindah & dipusatkan
-        // ke Log Data bareng import.
+    
         $adminRoleIds = User::role('admin')->pluck('id');
         $karyawanRoleIds = User::role('user')->pluck('id');
 
@@ -106,7 +102,7 @@ class UserActivityLogController extends Controller
             'adminLoginLogs' => $adminLoginLogs,
             'userLoginLogs' => $userLoginLogs,
             'failedLoginLogs' => $failedLoginLogs,
-            'title' => 'Log Login',
+            'title' => 'Log Sesi',
             'showAll' => $showAll,
             'rekapPerRole' => $rekapPerRole,
             'totalAdmin' => $totalAdmin,

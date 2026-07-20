@@ -10,10 +10,6 @@
         <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Profile</h1>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-100">{{ session('success') }}</div>
-    @endif
-
     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
         <div class="bg-gradient-to-br from-[#0f1729] via-[#1a2540] to-indigo-900 px-6 pb-14 pt-8">
             <p class="text-xs font-medium uppercase tracking-wider text-indigo-300">Akun Saya</p>

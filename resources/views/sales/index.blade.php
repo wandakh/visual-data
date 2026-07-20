@@ -4,7 +4,7 @@
 <div class="space-y-6" x-data="{ openDetail: null, deleteTarget: null }">
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Data Penjualan</h1>
+            <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Ringkasan Performa</h1>
             <p class="text-sm text-slate-500">{{ $filterActive ? 'Data yang diinput hari ini' : 'Sesuai filter yang aktif' }}</p>
         </div>
         <div class="flex gap-2">
@@ -25,43 +25,36 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-100">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">{{ session('error') }}</div>
-    @endif
-    @if (session('bisalogin'))
-        <div class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-100">{{ session('bisalogin') }}</div>
-    @endif
-
     <!-- Kartu statistik -->
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                 @include('partials.icon', ['name' => 'chart-bar', 'class' => 'h-5 w-5'])
             </div>
             <div>
                 <p class="font-display text-xl font-bold text-slate-800">{{ number_format($stats['total_transaksi'], 0, ',', '.') }}</p>
                 <p class="text-xs text-slate-500">Total Transaksi</p>
+                <p class="text-[10px] text-slate-400">{{ $filterActive ? 'Diinput hari ini' : 'Sesuai filter aktif' }}</p>
             </div>
         </div>
-        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                 @include('partials.icon', ['name' => 'download', 'class' => 'h-5 w-5'])
             </div>
             <div>
                 <p class="font-display text-xl font-bold text-slate-800">Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</p>
                 <p class="text-xs text-slate-500">Total Pendapatan</p>
+                <p class="text-[10px] text-slate-400">Update terakhir: {{ now()->format('d/m/Y H:i') }}</p>
             </div>
         </div>
-        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                 @include('partials.icon', ['name' => 'trophy', 'class' => 'h-5 w-5'])
             </div>
             <div>
                 <p class="font-display text-xl font-bold text-slate-800">{{ number_format($stats['total_customer'], 0, ',', '.') }}</p>
                 <p class="text-xs text-slate-500">Total Customer</p>
+                <p class="text-[10px] text-slate-400">Customer unik, sesuai filter</p>
             </div>
         </div>
     </div>
@@ -116,7 +109,7 @@
                     @endforeach
                 </select>
             </div>
-            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-900">
+            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700">
                 @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
                 Filter
             </button>

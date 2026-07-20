@@ -7,7 +7,7 @@
             @include('partials.icon', ['name' => 'chevron-left', 'class' => 'h-4 w-4'])
             Kembali
         </a>
-        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Log Data</h1>
+        <h1 class="font-display text-2xl font-bold tracking-tight text-slate-800">Jejak Aktivitas</h1>
     </div>
     <p class="-mt-4 text-sm text-slate-500">Riwayat tambah, edit, hapus, pulihkan, import, dan export data. Halaman ini selalu mulai dari "Hari Ini" tiap dibuka.</p>
 
@@ -20,9 +20,6 @@
     ])
 
     <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-        {{-- Diperbaiki: SENGAJA gak ada hidden field show_all di sini (beda
-             dengan Dashboard) — begitu kamu submit filter tanggal atau buka
-             halaman ini lagi dari menu, otomatis balik ke "Hari Ini". --}}
         <form action="{{ route('activity-log') }}" method="GET" class="flex flex-wrap items-end gap-3">
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-500">Dari tanggal</label>
@@ -32,20 +29,21 @@
                 <label class="mb-1 block text-xs font-medium text-slate-500">Sampai tanggal</label>
                 <input type="date" name="end_date" value="{{ request('end_date') }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
-            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+            <button type="submit" data-loading-text="Memfilter..." class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
                 @include('partials.icon', ['name' => 'filter', 'class' => 'h-4 w-4'])
                 Filter
             </button>
         </form>
     </div>
 
-    <!-- Card: Perubahan Data -->
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-        <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-            @include('partials.icon', ['name' => 'pencil', 'class' => 'h-4 w-4 text-slate-400'])
-            <h2 class="text-sm font-semibold text-slate-600">Perubahan Data</h2>
-        </div>
-        <div class="overflow-x-auto">
+    <!-- Perubahan Data -->
+    <div>
+        <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            @include('partials.icon', ['name' => 'pencil', 'class' => 'h-4 w-4 text-slate-600'])
+            Riwayat Perubahan Data
+        </h2>
+        <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-100 text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
@@ -83,15 +81,17 @@
         @if ($dataLogs->hasPages())
             <div class="border-t border-slate-100 px-4 py-3">{{ $dataLogs->links('vendor.pagination.custom') }}</div>
         @endif
+        </div>
     </div>
 
-    <!-- Card: Import Excel -->
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-        <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-            @include('partials.icon', ['name' => 'upload', 'class' => 'h-4 w-4 text-slate-400'])
-            <h2 class="text-sm font-semibold text-slate-600">Import Excel</h2>
-        </div>
-        <div class="overflow-x-auto">
+    <!-- Import Excel -->
+    <div>
+        <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            @include('partials.icon', ['name' => 'upload', 'class' => 'h-4 w-4 text-slate-800'])
+            Riwayat Import Data
+        </h2>
+        <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-100 text-sm">
                 <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
@@ -116,39 +116,42 @@
         @if ($importLogs->hasPages())
             <div class="border-t border-slate-100 px-4 py-3">{{ $importLogs->links('vendor.pagination.custom') }}</div>
         @endif
+        </div>
     </div>
 
-    <!-- Card: Export Excel -->
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-        <div class="flex items-center gap-2 border-b border-slate-100 px-5 py-3">
-            @include('partials.icon', ['name' => 'download', 'class' => 'h-4 w-4 text-slate-400'])
-            <h2 class="text-sm font-semibold text-slate-600">Export Excel</h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-100 text-sm">
-                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                    <tr>
-                        <th class="px-4 py-3 text-left">Waktu</th>
-                        <th class="px-4 py-3 text-left">User</th>
-                        <th class="px-4 py-3 text-left">Detail</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($exportLogs as $log)
-                        <tr class="hover:bg-slate-50/70">
-                            <td class="px-4 py-3 tabular-nums whitespace-nowrap text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="px-4 py-3 font-medium text-slate-700">{{ $log->user?->name ?? '-' }}</td>
-                            <td class="px-4 py-3 text-slate-600">{{ $log->description }}</td>
+    <!-- Export Excel -->
+    <div>
+        <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            @include('partials.icon', ['name' => 'download', 'class' => 'h-4 w-4 text-slate-800'])
+            Riwayat Export Data
+        </h2>
+        <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-100 text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Waktu</th>
+                            <th class="px-4 py-3 text-left">User</th>
+                            <th class="px-4 py-3 text-left">Detail</th>
                         </tr>
-                    @empty
-                        <tr><td colspan="3">@include('partials.empty-state', ['icon' => 'download', 'title' => 'Belum ada export tercatat'])</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($exportLogs as $log)
+                            <tr class="hover:bg-slate-50/70">
+                                <td class="px-4 py-3 tabular-nums whitespace-nowrap text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="px-4 py-3 font-medium text-slate-700">{{ $log->user?->name ?? '-' }}</td>
+                                <td class="px-4 py-3 text-slate-600">{{ $log->description }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3">@include('partials.empty-state', ['icon' => 'download', 'title' => 'Belum ada export tercatat'])</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if ($exportLogs->hasPages())
+                <div class="border-t border-slate-100 px-4 py-3">{{ $exportLogs->links('vendor.pagination.custom') }}</div>
+            @endif
         </div>
-        @if ($exportLogs->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3">{{ $exportLogs->links('vendor.pagination.custom') }}</div>
-        @endif
     </div>
 </div>
 @endsection

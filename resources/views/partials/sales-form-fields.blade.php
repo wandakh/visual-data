@@ -25,15 +25,6 @@
     ];
 @endphp
 
-{{--
-    Diperbaiki: Nama Customer sekarang jadi kolom PERTAMA yang diisi. Begitu
-    dipilih/diketik, kolom-kolom lain otomatis nyesuain isinya (via AJAX ke
-    /sales-record-options) ke pola yang biasa dipakai customer itu — soalnya
-    tiap perusahaan biasanya punya kode/pola sendiri. Sebelum ada customer
-    dipilih, dropdown nampilin semua pilihan yang pernah ada (dari semua
-    customer). Field tetap <input>+<datalist>, jadi tetap bisa diisi nilai
-    baru yang belum pernah ada.
---}}
 <div
     x-data="{
         customer: @js(old('NAMA_CUSTOMER', $data->NAMA_CUSTOMER ?? '')),
@@ -58,7 +49,12 @@
     <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">
             Nama Customer
-            <span class="ml-1 text-xs font-normal text-indigo-600" x-show="loading" x-cloak>memuat pilihan&hellip;</span>
+            <span class="ml-1 inline-flex items-center gap-1 text-xs font-normal text-indigo-600" x-show="loading" x-cloak>
+                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400"></span>
+                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400" style="animation-delay: 150ms"></span>
+                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400" style="animation-delay: 300ms"></span>
+                memuat pilihan&hellip;
+            </span>
         </label>
         <input type="text" name="NAMA_CUSTOMER" list="list-NAMA_CUSTOMER" required
                x-model="customer" x-on:input.debounce.400ms="fetchOptions()"
