@@ -239,7 +239,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
  
 <script>
-
     $('.delete').click(function(){
       var databaseid = $(this).attr('data-id');
       var nama = $(this).attr('data-nama');
